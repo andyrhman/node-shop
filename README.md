@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This project is my 4th of node express project, for this project i make a ecommerce like backend server with node express where i copy the method from my nestjs project called nest-shop.
+This is my 4th project of node express, for this project i make a ecommerce like backend server with node express where i copy the method from my nestjs project called nest-shop.
 
 ### First Time Set Up & Configuration
 

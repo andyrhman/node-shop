@@ -1,8 +1,20 @@
-import { Response, Router, Request } from "express";
+import { AuthMiddleware } from './middleware/auth.middleware';
+import { Router } from "express";
+import { AuthenticatedUser, Login, Logout, Register, ResendVerify, UpdateInfo, UpdatePassword, VerifyAccount } from "./controller/auth.controller";
 
 export const routes = (router: Router) => {
-  router.get("/api/test", (req: Request, res: Response) => {
-    res.send({ message: "test123" });
-  });
-  
+  router.post("/api/user/register", Register);
+  router.post("/api/admin/login", Login);
+  router.post("/api/user/login", Login);
+  router.get("/api/admin", AuthMiddleware, AuthenticatedUser);
+  router.get("/api/user", AuthMiddleware, AuthenticatedUser);
+  router.post("/api/admin/logout", AuthMiddleware, Logout);
+  router.post("/api/user/logout", AuthMiddleware, Logout);
+  router.put("/api/admin/info", AuthMiddleware, UpdateInfo);
+  router.put("/api/user/info", AuthMiddleware, UpdateInfo);
+  router.put("/api/admin/password", AuthMiddleware, UpdatePassword);
+  router.put("/api/user/password", AuthMiddleware, UpdatePassword);
+  router.post("/api/verify", ResendVerify);
+
+  router.put("/api/verify/:token", VerifyAccount);
 };

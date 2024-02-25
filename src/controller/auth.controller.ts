@@ -14,7 +14,9 @@ import * as argon2 from "argon2";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as handlebars from "handlebars";
+// import * as FB from 'fb';
 import { TokenService } from "../service/token.service";
+import { OAuth2Client } from "google-auth-library";
 
 export const Register = async (req: Request, res: Response) => {
   try {
@@ -348,6 +350,138 @@ export const ResendVerify = async (req: Request, res: Response) => {
     await transporter.sendMail(options);
 
     res.status(200).send({ message: "Email has successfully sent" });
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const GoogleAuth = async (req: Request, res: Response) => {
+  try {
+    const { token, rememberMe } = req.body;
+    const repository = myDataSource.getRepository(User);
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const client = new OAuth2Client(clientId);
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: clientId,
+    });
+
+    const googleUser = ticket.getPayload();
+
+    if (!googleUser) {
+      return res.status(401).send("Unauthorized");
+    }
+
+    let user = await repository.findOne({ where: { email: googleUser.email } });
+
+    if (!user) {
+      // Generate a random username and password
+      const randomUsername = `user${Math.floor(Math.random() * 1000)}`;
+      const randomPassword = Math.random().toString(36).slice(-10);
+      const hashedPassword = await argon2.hash(randomPassword);
+
+      // Generate a random 10-character password
+      user = await repository.save({
+        fullName: randomUsername,
+        username: randomUsername,
+        email: googleUser.email,
+        password: hashedPassword,
+      });
+    }
+
+    // Calculate the expiration time for the refresh token
+    // Generate a refresh token using the JWT service with the calculated expiration time.
+    const refreshTokenExpiration = rememberMe
+      ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+      : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Adding 7 days in milliseconds
+
+    const jwt = sign(
+      {
+        id: user.id,
+        scope: "user",
+      },
+      process.env.JWT_SECRET_ACCESS
+    );
+
+    res.cookie("my_session", jwt, {
+      httpOnly: true,
+      expires: refreshTokenExpiration,
+    });
+    res.status(200).send({ message: "Succesfully logged in" });
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const FacebookAuth = async (req: Request, res: Response) => {
+  try {
+    const { token, rememberMe } = req.body;
+    const repository = myDataSource.getRepository(User);
+    const appId = process.env.FACEBOOK_APP_ID;
+    const clientSecret = process.env.FACEBOOK_CLIENT_SECRET;
+
+    var FB = require("fb");
+
+    FB.options({
+      appId: appId,
+      appSecret: clientSecret,
+      version: "v11.0",
+    });
+
+    const jwt = await new Promise((resolve, reject) => {
+      FB.api(
+        "me",
+        { fields: ["id", "name", "email"], access_token: token },
+        async (res: any) => {
+          if (!res || res.error) {
+            console.log(!res ? "error occurred" : res.error);
+            reject(res.status(401).send({ message: "Unauthorized" }));
+            return;
+          }
+
+          let user = await repository.findOne({ where: { email: res.email } });
+
+          if (!user) {
+            const randomUsername = `user${Math.floor(Math.random() * 1000)}`;
+            const randomPassword = Math.random().toString(36).slice(-10);
+            const hashedPassword = await argon2.hash(randomPassword);
+
+            user = await repository.save({
+              fullName: randomUsername,
+              username: randomUsername,
+              email: res.email,
+              password: hashedPassword,
+            });
+          }
+
+          const refreshTokenExpiration = rememberMe
+            ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+            : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Adding 7 days in milliseconds
+
+          const adminLogin = req.path === "/api/admin/login";
+
+          if (user.is_user && adminLogin) {
+            return res.status(400).send({ message: "Unauthorized" });
+          }
+
+          res.cookie("my_session", jwt, {
+            httpOnly: true,
+            expires: refreshTokenExpiration,
+          });
+
+          resolve(jwt);
+        }
+      );
+    });
+
+    res.status(200).send({ message: "Succesfully logged in" });
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

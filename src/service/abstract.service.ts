@@ -11,6 +11,10 @@ export abstract class AbstractService<T> {
         return await this.repository.find({ relations });
     }
 
+    async find(options: any, relations = []) {
+        return this.repository.find({ where: options, relations });
+    }
+
     async create(data: Partial<T>): Promise<T> {
         return this.repository.save(data as any);
     }

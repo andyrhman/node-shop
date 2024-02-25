@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { ProductImages } from "./product-variation.entity";
-import { ProductVariation } from "./product-images.entity";
+import { ProductImages } from "./product-images.entity";
+import { ProductVariation } from "./product-variation.entity";
 import { Category } from "./category.entity";
 // import { Cart } from "src/cart/models/cart.entity";
 // import { OrderItem } from "src/order/models/order-item.entity";

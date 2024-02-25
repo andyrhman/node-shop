@@ -11,7 +11,9 @@ import { UpdateCategoryDTO } from "../validation/dto/category/update-category.dt
 export const Categories = async (req: Request, res: Response) => {
   try {
     res.send(
-      myDataSource.getRepository(Category).find({ relations: ["product"] })
+      await myDataSource
+        .getRepository(Category)
+        .find({ relations: ["product"] })
     );
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
@@ -23,7 +25,7 @@ export const Categories = async (req: Request, res: Response) => {
 
 export const AdminAllCategories = async (req: Request, res: Response) => {
   try {
-    res.send(myDataSource.getRepository(Category).find({}));
+    res.send(await myDataSource.getRepository(Category).find({}));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);
@@ -57,7 +59,7 @@ export const CreateCategory = async (req: Request, res: Response) => {
 export const GetCategory = async (req: Request, res: Response) => {
   try {
     res.send(
-      myDataSource
+      await myDataSource
         .getRepository(Category)
         .findOne({ where: { id: req.params.id } })
     );
@@ -71,20 +73,20 @@ export const GetCategory = async (req: Request, res: Response) => {
 
 export const UpdateCategory = async (req: Request, res: Response) => {
   try {
-    const id: any = req.params;
+    const { id }: any = req.params;
     const repository = myDataSource.getRepository(Category);
     const body = req.body;
     const input = plainToClass(UpdateCategoryDTO, body);
     const validationErrors = await validate(input);
 
+    if (!isUUID(id)) {
+      return res.status(400).send({ message: "Invalid Request" });
+    }
     if (validationErrors.length > 0) {
       // Use the utility function to format and return the validation errors
       return res.status(400).json(formatValidationErrors(validationErrors));
     }
 
-    if (!isUUID(id)) {
-      return res.status(400).send({ message: "Invalid Request" });
-    }
     const category = await repository.findOne({ where: { id: id } });
 
     if (!category) {

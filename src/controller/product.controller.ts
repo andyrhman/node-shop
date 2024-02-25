@@ -12,6 +12,8 @@ import logger from "../config/logger.config";
 import myDataSource from "../config/db.config";
 import slugify from "slugify";
 import { ProductUpdateDto } from "../validation/dto/products/product-update.dto";
+import { ProductImageService } from "../service/product-images.service";
+import { ProductVariantService } from "../service/product-variant.service";
 
 export const Products = async (req: Request, res: Response) => {
   try {
@@ -148,7 +150,7 @@ export const CreateProduct = async (req: Request, res: Response) => {
   }
 };
 
-export const AllVariants = async (req: Request, res: Response) => {
+export const Variants = async (req: Request, res: Response) => {
   try {
     res.send(await myDataSource.getRepository(ProductVariation).find({}));
   } catch (error) {
@@ -314,27 +316,28 @@ export const UpdateProductImages = async (req: Request, res: Response) => {
   }
 };
 
-export const Delete = async (req: Request, res: Response) => {
+export const DeleteProduct = async (req: Request, res: Response) => {
   try {
+    const productImageService = new ProductImageService();
+    const productVariantService = new ProductVariantService();
+
     // * Find the related images
-    const findImages = await myDataSource
-      .getRepository(ProductImages)
-      .find({ where: { productId: req.params.id } });
+    const findImages = await productImageService.find({
+      productId: req.params.id,
+    });
 
     // * Delete the multiple images
     for (const image of findImages) {
-      await myDataSource.getRepository(ProductImages).delete(image.productId);
+        await productImageService.deleteMultipleImages(image.productId);
     }
 
     // * Delete the related variants
     for (const variant of findImages) {
-      await myDataSource
-        .getRepository(ProductVariation)
-        .delete(variant.productId);
+        await productVariantService.deleteMultipleVariants(variant.productId);
     }
 
     // * Delete the product
-    return myDataSource.getRepository(Product).delete(req.params.id);
+    res.send(await myDataSource.getRepository(Product).delete(req.params.id));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);
@@ -358,6 +361,18 @@ export const DeleteProductImage = async (req: Request, res: Response) => {
 export const DeleteProductVariation = async (req: Request, res: Response) => {
   try {
     await myDataSource.getRepository(ProductVariation).delete(req.params.id);
+    res.status(204).send(null);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const GetProductAvgRating = async (req: Request, res: Response) => {
+  try {
+    //   await myDataSource.getRepository(Review).calculateAverageRating(req.params.id);
     res.status(204).send(null);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {

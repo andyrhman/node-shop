@@ -1,11 +1,13 @@
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { Router } from "express";
-import { AuthenticatedUser, Login, Logout, Register, ResendVerify, UpdateInfo, UpdatePassword, VerifyAccount } from "./controller/auth.controller";
+import { AuthenticatedUser, FacebookAuth, Login, Logout, Register, ResendVerify, UpdateInfo, UpdatePassword, VerifyAccount, googleAuth } from "./controller/auth.controller";
 
 export const routes = (router: Router) => {
   router.post("/api/user/register", Register);
   router.post("/api/admin/login", Login);
   router.post("/api/user/login", Login);
+  router.post("/api/user/google-auth", googleAuth);
+  router.post("/api/user/facebook-auth", FacebookAuth);
   router.get("/api/admin", AuthMiddleware, AuthenticatedUser);
   router.get("/api/user", AuthMiddleware, AuthenticatedUser);
   router.post("/api/admin/logout", AuthMiddleware, Logout);

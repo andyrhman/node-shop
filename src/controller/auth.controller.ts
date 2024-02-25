@@ -358,7 +358,7 @@ export const ResendVerify = async (req: Request, res: Response) => {
   }
 };
 
-export const GoogleAuth = async (req: Request, res: Response) => {
+export const googleAuth = async (req: Request, res: Response) => {
   try {
     const { token, rememberMe } = req.body;
     const repository = myDataSource.getRepository(User);

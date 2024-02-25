@@ -11,6 +11,7 @@ import { ProductVariation } from "../entity/product-variation.entity";
 import logger from "../config/logger.config";
 import myDataSource from "../config/db.config";
 import slugify from "slugify";
+import { ProductUpdateDto } from "../validation/dto/products/product-update.dto";
 
 export const Products = async (req: Request, res: Response) => {
   try {
@@ -166,8 +167,8 @@ export const GetProduct = async (req: Request, res: Response) => {
         "product_images",
         "variant",
         "category",
-        "review",
-        "review.user",
+        // "review",
+        // "review.user",
       ],
     });
 
@@ -178,6 +179,186 @@ export const GetProduct = async (req: Request, res: Response) => {
     // (product as any).reviewCount = ratingAndReviewCount.reviewCount;
 
     res.send(product);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const GetProductAdmin = async (req: Request, res: Response) => {
+  try {
+    res.send(
+      await myDataSource.getRepository(Product).findOne({
+        where: { id: req.params.id },
+        relations: ["product_images", "variant", "category"],
+      })
+    );
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const UpdateProduct = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const repository = myDataSource.getRepository(Product);
+    const input = plainToClass(ProductUpdateDto, body);
+    const validationErrors = await validate(input);
+
+    if (validationErrors.length > 0) {
+      // Use the utility function to format and return the validation errors
+      return res.status(400).json(formatValidationErrors(validationErrors));
+    }
+
+    if (!isUUID(req.params.id)) {
+      return res.status(400).send({ message: "Invalid Request" });
+    }
+    const products = await repository.findOne({ where: { id: req.params.id } });
+    if (!products) {
+      return res.status(404).send({ message: "Invalid Request" });
+    }
+
+    await repository.update(req.params.id, body);
+
+    res.send(await repository.findOne({ where: { id: req.params.id } }));
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const UpdateProductVariants = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const repository = myDataSource.getRepository(Product);
+    const input = plainToClass(ProductUpdateDto, body);
+    const validationErrors = await validate(input);
+
+    if (validationErrors.length > 0) {
+      // Use the utility function to format and return the validation errors
+      return res.status(400).json(formatValidationErrors(validationErrors));
+    }
+
+    if (!isUUID(req.params.id)) {
+      return res.status(400).send({ message: "Invalid Request" });
+    }
+    const product = await repository.findOne({ where: { id: req.params.id } });
+    if (!product) {
+      return res.status(404).send({ message: "Invalid Request" });
+    }
+
+    for (let v of body.variants) {
+      const productVariant = new ProductVariation();
+      productVariant.name = v;
+      productVariant.product_id = product.id;
+      await myDataSource.getRepository(ProductVariation).save(productVariant);
+    }
+
+    res.send(
+      await myDataSource
+        .getRepository(ProductVariation)
+        .find({ where: { product_id: req.params.id } })
+    );
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const UpdateProductImages = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const repository = myDataSource.getRepository(Product);
+    const input = plainToClass(ProductUpdateDto, body);
+    const validationErrors = await validate(input);
+
+    if (validationErrors.length > 0) {
+      // Use the utility function to format and return the validation errors
+      return res.status(400).json(formatValidationErrors(validationErrors));
+    }
+
+    if (!isUUID(req.params.id)) {
+      return res.status(400).send({ message: "Invalid Request" });
+    }
+    const product = await repository.findOne({ where: { id: req.params.id } });
+    if (!product) {
+      return res.status(404).send({ message: "Invalid Request" });
+    }
+
+    for (let i of body.images) {
+      const productImages = new ProductImages();
+      productImages.productId = req.params.id;
+      productImages.image = i;
+      await myDataSource.getRepository(ProductImages).save(productImages);
+    }
+
+    res.send(
+      await myDataSource
+        .getRepository(ProductImages)
+        .find({ where: { productId: req.params.id } })
+    );
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const Delete = async (req: Request, res: Response) => {
+  try {
+    // * Find the related images
+    const findImages = await myDataSource
+      .getRepository(ProductImages)
+      .find({ where: { productId: req.params.id } });
+
+    // * Delete the multiple images
+    for (const image of findImages) {
+      await myDataSource.getRepository(ProductImages).delete(image.productId);
+    }
+
+    // * Delete the related variants
+    for (const variant of findImages) {
+      await myDataSource
+        .getRepository(ProductVariation)
+        .delete(variant.productId);
+    }
+
+    // * Delete the product
+    return myDataSource.getRepository(Product).delete(req.params.id);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const DeleteProductImage = async (req: Request, res: Response) => {
+  try {
+    await myDataSource.getRepository(ProductImages).delete(req.params.id);
+    res.status(204).send(null);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
+
+export const DeleteProductVariation = async (req: Request, res: Response) => {
+  try {
+    await myDataSource.getRepository(ProductVariation).delete(req.params.id);
+    res.status(204).send(null);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

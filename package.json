@@ -4,7 +4,8 @@
   "description": "ecommerce like project with node express with typescript",
   "main": "index.ts",
   "scripts": {
-    "start": "chcp 65001 && nodemon src/index.ts"
+    "start": "chcp 65001 && nodemon src/index.ts",
+    "seed:products": "chcp 65001 && ts-node src/commands/product.seeder.ts"
   },
   "repository": {
     "type": "git",

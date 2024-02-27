@@ -8,9 +8,9 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { Token } from "./token.entity";
+import { Cart } from "./cart.entity";
 // import { Address } from "src/address/models/address.entity";
 // import { Order } from "src/order/models/order.entity";
-// import { Cart } from "src/cart/models/cart.entity";
 // import { Review } from "src/review/models/review.entity";
 
 @Entity("users")
@@ -48,8 +48,8 @@ export class User {
   // @OneToMany(() => Order, (order) => order.user)
   // orders: Order[];
 
-  // @OneToMany(() => Cart, (cart) => cart.user)
-  // cart: Cart[];
+  @OneToMany(() => Cart, (cart) => cart.user)
+  cart: Cart[];
 
   @OneToMany(() => Token, (token) => token.user, {
     createForeignKeyConstraints: false,

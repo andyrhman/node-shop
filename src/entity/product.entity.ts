@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, Pri
 import { ProductImages } from "./product-images.entity";
 import { ProductVariation } from "./product-variation.entity";
 import { Category } from "./category.entity";
-// import { Cart } from "src/cart/models/cart.entity";
+import { Cart } from "./cart.entity";
 // import { OrderItem } from "src/order/models/order-item.entity";
 // import { Review } from "src/review/models/review.entity";
 
@@ -41,8 +41,8 @@ export class Product {
   @OneToMany(() => ProductVariation, (variant) => variant.product)
   variant: ProductVariation[];
 
-//   @OneToMany(() => Cart, (cart) => cart.product)
-//   cart: Cart[];
+  @OneToMany(() => Cart, (cart) => cart.product)
+  cart: Cart[];
 
 //   @OneToMany(() => OrderItem, (order_item) => order_item.product)
 //   order_item: OrderItem[];

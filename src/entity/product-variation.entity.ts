@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Product } from "./product.entity";
-// import { Cart } from "src/cart/models/cart.entity";
+import { Cart } from "./cart.entity";
 // import { OrderItem } from "src/order/models/order-item.entity";
 // import { Review } from "src/review/models/review.entity";
 
@@ -19,8 +19,8 @@ export class ProductVariation {
     @JoinColumn({name: "product_id"})
     product: Product;
 
-    // @OneToMany(() => Cart, (cart) => cart.variant)
-    // cart: Cart[];
+    @OneToMany(() => Cart, (cart) => cart.variant)
+    cart: Cart[];
 
     // @OneToMany(() => OrderItem, (order_item) => order_item.variant)
     // order_item: OrderItem[];

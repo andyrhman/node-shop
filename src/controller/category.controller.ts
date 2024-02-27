@@ -2,11 +2,11 @@ import { Request, Response } from "express";
 import myDataSource from "../config/db.config";
 import { Category } from "../entity/category.entity";
 import logger from "../config/logger.config";
-import { CreateCategoryDTO } from "../validation/dto/category/create-category.dto";
+import { CreateCategoryDTO } from "../validation/dto/categories/create-category.dto";
 import { plainToClass } from "class-transformer";
 import { isUUID, validate } from "class-validator";
 import { formatValidationErrors } from "../validation/utility/validation.utility";
-import { UpdateCategoryDTO } from "../validation/dto/category/update-category.dto";
+import { UpdateCategoryDTO } from "../validation/dto/categories/update-category.dto";
 
 export const Categories = async (req: Request, res: Response) => {
   try {

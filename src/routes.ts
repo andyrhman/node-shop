@@ -1,8 +1,10 @@
+import { userIdMidlleware } from './middleware/userid.middleware';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { Router } from "express";
 import { AuthenticatedUser, FacebookAuth, Login, Logout, Register, ResendVerify, UpdateInfo, UpdatePassword, VerifyAccount, googleAuth } from "./controller/auth.controller";
 import { AdminAllCategories, Categories, CreateCategory, DeleteCategory, GetCategory, UpdateCategory } from './controller/category.controller';
 import { CreateProduct, DeleteProduct, DeleteProductImage, DeleteProductVariation, GetProduct, GetProductAdmin, GetProductAvgRating, Products, UpdateProduct, UpdateProductImages, UpdateProductVariants, Variants } from './controller/product.controller';
+import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCart, UpdateCartQuantity } from './controller/cart.controller';
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -43,4 +45,13 @@ export const routes = (router: Router) => {
   router.delete('/api/admin/product/:id', AuthMiddleware, DeleteProduct);
   router.delete('/api/admin/product-images/:id', AuthMiddleware, DeleteProductImage);
   router.delete('/api/admin/product-variants/:id', AuthMiddleware, DeleteProductVariation);
+
+  // * Cart
+  router.get('/api/admin/carts', AuthMiddleware, Carts);
+  router.get('/api/admin/carts/:id', AuthMiddleware, GetUserCart);
+  router.post('/api/cart', userIdMidlleware, CreateCart);
+  router.get('/api/cart', userIdMidlleware, GetAuthUserCart);
+  router.put('/api/cart/:id', userIdMidlleware, UpdateCartQuantity);
+  router.delete('/api/cart/:cart_id', userIdMidlleware, DeleteCart);
+  router.get('/api/cart-total', userIdMidlleware, GetTotalCart);
 };

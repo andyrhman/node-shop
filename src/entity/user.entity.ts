@@ -10,7 +10,7 @@ import {
 import { Token } from "./token.entity";
 import { Cart } from "./cart.entity";
 // import { Address } from "src/address/models/address.entity";
-// import { Order } from "src/order/models/order.entity";
+import { Order } from "./order.entity";
 // import { Review } from "src/review/models/review.entity";
 
 @Entity("users")
@@ -45,8 +45,8 @@ export class User {
   // @OneToOne(() => Address, (address) => address.user)
   // address: Address;
 
-  // @OneToMany(() => Order, (order) => order.user)
-  // orders: Order[];
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   @OneToMany(() => Cart, (cart) => cart.user)
   cart: Cart[];

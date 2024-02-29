@@ -3,7 +3,7 @@ import { ProductImages } from "./product-images.entity";
 import { ProductVariation } from "./product-variation.entity";
 import { Category } from "./category.entity";
 import { Cart } from "./cart.entity";
-// import { OrderItem } from "src/order/models/order-item.entity";
+import { OrderItem } from "./order-items.entity";
 // import { Review } from "src/review/models/review.entity";
 
 @Entity('products')
@@ -44,8 +44,8 @@ export class Product {
   @OneToMany(() => Cart, (cart) => cart.product)
   cart: Cart[];
 
-//   @OneToMany(() => OrderItem, (order_item) => order_item.product)
-//   order_item: OrderItem[];
+  @OneToMany(() => OrderItem, (order_item) => order_item.product)
+  order_item: OrderItem[];
 
 //   @OneToMany(() => Review, (review) => review.product)
 //   review: Review[];

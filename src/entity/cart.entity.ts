@@ -2,6 +2,7 @@
 import { ProductVariation } from "./product-variation.entity";
 import { Product } from "./product.entity";
 import { User } from "./user.entity";
+import { Order } from "./order.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('carts')
@@ -44,9 +45,9 @@ export class Cart{
     @JoinColumn({name: "user_id"})
     user: User;
 
-    // @ManyToOne(() => Order, (order) => order.cart)
-    // @JoinColumn({name: "order_id"})
-    // order: Order;
+    @ManyToOne(() => Order, (order) => order.cart)
+    @JoinColumn({name: "order_id"})
+    order: Order;
 
     @ManyToOne(() => ProductVariation, (variant) => variant.cart)
     @JoinColumn({name: "variant_id"})

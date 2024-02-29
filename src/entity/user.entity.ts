@@ -9,7 +9,7 @@ import {
 } from "typeorm";
 import { Token } from "./token.entity";
 import { Cart } from "./cart.entity";
-// import { Address } from "src/address/models/address.entity";
+import { Address } from "./address.entity";
 import { Order } from "./order.entity";
 // import { Review } from "src/review/models/review.entity";
 
@@ -42,8 +42,8 @@ export class User {
   @UpdateDateColumn()
   updated_at: string;
 
-  // @OneToOne(() => Address, (address) => address.user)
-  // address: Address;
+  @OneToOne(() => Address, (address) => address.user)
+  address: Address;
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];

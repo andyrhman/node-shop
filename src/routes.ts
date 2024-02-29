@@ -6,6 +6,7 @@ import { AdminAllCategories, Categories, CreateCategory, DeleteCategory, GetCate
 import { CreateProduct, DeleteProduct, DeleteProductImage, DeleteProductVariation, GetProduct, GetProductAdmin, GetProductAvgRating, Products, UpdateProduct, UpdateProductImages, UpdateProductVariants, Variants } from './controller/product.controller';
 import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCart, UpdateCartQuantity } from './controller/cart.controller';
 import { Upload } from './controller/upload.controller';
+import { Address, CreateAddress, DeleteAddress, GetAddress, UpdateAddress } from './controller/address.controller';
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -24,6 +25,13 @@ export const routes = (router: Router) => {
   router.put("/api/user/password", AuthMiddleware, UpdatePassword);
   router.post("/api/verify", ResendVerify);
   router.put("/api/verify/:token", VerifyAccount);
+
+  // * Address
+  router.get('/api/admin/address', AuthMiddleware, Address);
+  router.post('/api/address', userIdMidlleware, CreateAddress);
+  router.get('/api/address', userIdMidlleware, GetAddress);
+  router.put('/api/address', userIdMidlleware, UpdateAddress);
+  router.delete('/api/address', userIdMidlleware, DeleteAddress);
 
   // * Category
   router.get('/api/categories', Categories);

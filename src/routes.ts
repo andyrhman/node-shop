@@ -1,10 +1,11 @@
 import { userIdMidlleware } from './middleware/userid.middleware';
 import { AuthMiddleware } from './middleware/auth.middleware';
-import { Router } from "express";
+import express, { Router } from "express";
 import { AuthenticatedUser, FacebookAuth, Login, Logout, Register, ResendVerify, UpdateInfo, UpdatePassword, VerifyAccount, googleAuth } from "./controller/auth.controller";
 import { AdminAllCategories, Categories, CreateCategory, DeleteCategory, GetCategory, UpdateCategory } from './controller/category.controller';
 import { CreateProduct, DeleteProduct, DeleteProductImage, DeleteProductVariation, GetProduct, GetProductAdmin, GetProductAvgRating, Products, UpdateProduct, UpdateProductImages, UpdateProductVariants, Variants } from './controller/product.controller';
 import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCart, UpdateCartQuantity } from './controller/cart.controller';
+import { Upload } from './controller/upload.controller';
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -45,6 +46,10 @@ export const routes = (router: Router) => {
   router.delete('/api/admin/product/:id', AuthMiddleware, DeleteProduct);
   router.delete('/api/admin/product-images/:id', AuthMiddleware, DeleteProductImage);
   router.delete('/api/admin/product-variants/:id', AuthMiddleware, DeleteProductVariation);
+
+  // * Upload
+  router.post('/api/admin/upload', AuthMiddleware, Upload);
+  router.use('/api/uploads', express.static('./uploads'));
 
   // * Cart
   router.get('/api/admin/carts', AuthMiddleware, Carts);

@@ -12,6 +12,7 @@ import { ValidationMiddleware } from "./middleware/validation.middleware";
 export const eventEmitter = new EventEmitter();
 
 import "./event/auth.listener"
+import "./event/order.listener"
 import { userIdMidlleware } from "./middleware/userid.middleware";
 
 const app = express();

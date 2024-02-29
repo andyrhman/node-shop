@@ -7,6 +7,7 @@ import { CreateProduct, DeleteProduct, DeleteProductImage, DeleteProductVariatio
 import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCart, UpdateCartQuantity } from './controller/cart.controller';
 import { Upload } from './controller/upload.controller';
 import { Address, CreateAddress, DeleteAddress, GetAddress, UpdateAddress } from './controller/address.controller';
+import { ChangeOrderStatus, ConfirmOrder, CreateOrder, GetOrderItem, GetUserOrder, Orders } from './controller/order.controller';
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -67,4 +68,12 @@ export const routes = (router: Router) => {
   router.put('/api/cart/:id', userIdMidlleware, UpdateCartQuantity);
   router.delete('/api/cart/:cart_id', userIdMidlleware, DeleteCart);
   router.get('/api/cart-total', userIdMidlleware, GetTotalCart);
+
+  // * Order
+  router.get('/api/admin/orders', AuthMiddleware, Orders);
+  router.post('/api/checkout/orders', userIdMidlleware, CreateOrder);
+  router.post('/api/checkout/orders/confirm', userIdMidlleware, ConfirmOrder);
+  router.get('/api/order-user', userIdMidlleware, GetUserOrder);
+  router.get('/api/admin/order-items/:id', AuthMiddleware, GetOrderItem);
+  router.put('/api/admin/orders/:id', AuthMiddleware, ChangeOrderStatus);
 };

@@ -13,14 +13,12 @@ export const eventEmitter = new EventEmitter();
 
 import "./event/auth.listener"
 import "./event/order.listener"
-import { userIdMidlleware } from "./middleware/userid.middleware";
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(ValidationMiddleware);
-// app.use(userIdMidlleware);
 app.use(
   cors({
     credentials: true,

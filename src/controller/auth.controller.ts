@@ -68,7 +68,9 @@ export const Login = async (req: Request, res: Response) => {
       where: { username: body.username, email: body.email },
     });
 
-    if (!checkUser.is_verified) {
+    if (checkUser.is_verified === null) {
+      return res.status(401).send({ message: "Please register first" });
+    } else if (!checkUser.is_verified ) {
       return res.status(401).send({ message: "Please verify your account" });
     }
 

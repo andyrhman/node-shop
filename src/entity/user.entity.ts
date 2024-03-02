@@ -11,7 +11,7 @@ import { Token } from "./token.entity";
 import { Cart } from "./cart.entity";
 import { Address } from "./address.entity";
 import { Order } from "./order.entity";
-// import { Review } from "src/review/models/review.entity";
+import { Review } from "./review.entity";
 
 @Entity("users")
 export class User {
@@ -56,6 +56,6 @@ export class User {
   })
   verify: Token[];
 
-  // @OneToMany(() => Review, (review) => review.user)
-  // review: Review[];
+  @OneToMany(() => Review, (review) => review.user)
+  review: Review[];
 }

@@ -3,7 +3,7 @@ import { User } from "./user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { OrderItem } from "./order-items.entity";
 import { Cart } from "./cart.entity";
-// import { Review } from "src/review/models/review.entity";
+import { Review } from "./review.entity";
 
 @Entity('orders')
 export class Order {
@@ -38,8 +38,8 @@ export class Order {
     @OneToMany(() => Cart, cart => cart.order)
     cart: Cart[];
 
-    // @OneToMany(() => Review, review => review.order)
-    // review: Review[];
+    @OneToMany(() => Review, review => review.order)
+    review: Review[];
 
     // * Getting the total price
     @Expose()

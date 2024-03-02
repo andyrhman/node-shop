@@ -7,6 +7,7 @@ const myDataSource = new DataSource({
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DATABASE,
+    ssl: true,
     entities: [
         "src/entity/*.ts"
     ],

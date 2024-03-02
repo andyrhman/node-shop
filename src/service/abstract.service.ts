@@ -31,6 +31,12 @@ export abstract class AbstractService<T> {
         return this.repository.findOne({ where: options, relations } as any);
     }
 
+    async total(options: any, relations = []) {
+        const entities = await this.repository.find({ where: options, relations });
+        return {
+            total: entities.length
+        };
+    }
 
     async findByEmail(email: string): Promise<T | null> {
         return this.repository.findOne({ where: { email } } as any);

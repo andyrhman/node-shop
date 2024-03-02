@@ -56,6 +56,12 @@ export const GetReviewsUser = async (req: Request, res: Response) => {
 };
 
 // ! [BUG] Create user review.
+// ! If the user buy the same products with different order id 
+// ! It will show the message --> You have already review this product.
+// ! Fix the code by insert the order id and then validate 
+// ! if the order id is the same or different
+
+// ! Use the frontend to get the order id by create some kind of link in the order page
 // ? https://www.phind.com/search?cache=jzhjmit5z3nnh9ky1xhmu369
 export const CreateReview = async (req: Request, res: Response) => {
   try {
@@ -77,7 +83,7 @@ export const CreateReview = async (req: Request, res: Response) => {
     const orderItemService = new OrderItemService();
 
     const user = req["id"];
-    
+
     const reviewExist = await reviewService.findOne({
       user_id: user,
       product_id: body.product_id,
@@ -86,15 +92,17 @@ export const CreateReview = async (req: Request, res: Response) => {
     const product = await productService.findOne({ id: body.product_id });
 
     if (reviewExist) {
-      return res.status(400).send("You have already review this product.");
+      return res
+        .status(400)
+        .send({ message: "You have already review this product." });
     }
 
     if (body.star > 5) {
-      return res.status(400).send("Invalid Request");
+      return res.status(400).send({ message: "Invalid Request" });
     }
 
     if (!product) {
-      return res.status(404).send("Product does not exist.");
+      return res.status(404).send({ message: "Product does not exist." });
     }
 
     const completedOrders = await orderService.findCompletedOrdersByUser(user);
@@ -107,7 +115,9 @@ export const CreateReview = async (req: Request, res: Response) => {
     if (!productInOrderItems) {
       return res
         .status(400)
-        .send("You can't review a product that you haven't purchased.");
+        .send({
+          message: "You can't review a product that you haven't purchased.",
+        });
     }
 
     const review = await reviewService.create({

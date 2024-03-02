@@ -14,16 +14,19 @@ import slugify from "slugify";
 import { ProductUpdateDto } from "../validation/dto/products/product-update.dto";
 import { ProductImageService } from "../service/product-images.service";
 import { ProductVariantService } from "../service/product-variant.service";
+import { ReviewService } from "../service/review.service";
 
 export const Products = async (req: Request, res: Response) => {
   try {
     const repository = new ProductService();
+    const reviewService = new ReviewService();
     let products = await repository.find({}, ["variant", "category"]);
 
     // Add average rating to each product.
-    // for (let product of products) {
-    //     (product as any).averageRating = await this.reviewService.calculateAverageRating(product.id);
-    // }
+    for (let product of products) {
+      (product as any).averageRating =
+        await reviewService.calculateAverageRating(product.id);
+    }
 
     // Existing filter and sort code...
     if (req.query.search) {
@@ -328,12 +331,12 @@ export const DeleteProduct = async (req: Request, res: Response) => {
 
     // * Delete the multiple images
     for (const image of findImages) {
-        await productImageService.deleteMultipleImages(image.productId);
+      await productImageService.deleteMultipleImages(image.productId);
     }
 
     // * Delete the related variants
     for (const variant of findImages) {
-        await productVariantService.deleteMultipleVariants(variant.productId);
+      await productVariantService.deleteMultipleVariants(variant.productId);
     }
 
     // * Delete the product
@@ -372,8 +375,8 @@ export const DeleteProductVariation = async (req: Request, res: Response) => {
 
 export const GetProductAvgRating = async (req: Request, res: Response) => {
   try {
-    //   await myDataSource.getRepository(Review).calculateAverageRating(req.params.id);
-    res.status(204).send(null);
+    const reviewService = new ReviewService();
+    res.send(await reviewService.calculateAverageRating(req.params.id));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

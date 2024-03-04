@@ -1,19 +1,17 @@
-require('dotenv').config();
-import { DataSource } from "typeorm";
+require("dotenv").config();
 
-const seederSource = new DataSource({
-    type: "postgres",
-    host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_PORT || '5432'),
-    username: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DATABASE,
-    entities: [
-        "src/entity/*.ts"
-    ],
-    logging: false,
-    synchronize: process.env.NODE_ENV === 'development'
-    // ssl: true,
-});
+import logger from './logger.config';
+import mongoose from 'mongoose';
 
-export default seederSource;
+const MongooSeeder = () => {
+    mongoose.connect(`mongodb+srv://tataran:${process.env.MONGO_PASSWORD}@nodeadmin.yjvkzpx.mongodb.net/node_shop?retryWrites=true&w=majority`)
+        .then(() => logger.info('🗃️ Database has been initialized!'))
+        .catch((err) => logger.error(err));
+    // require('../models/user.schema');
+    // require('../models/product.schema');
+    // require('../models/link.schema');
+    // require('../models/order.schema');
+    // require('../models/order-item.schema');
+}
+
+export default MongooSeeder;

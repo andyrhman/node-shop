@@ -1,75 +1,75 @@
-import { FindManyOptions, Repository } from 'typeorm';
+// import { FindManyOptions, Repository } from 'typeorm';
 
-export abstract class AbstractService<T> {
-    protected repository: Repository<T>;
+// export abstract class AbstractService<T> {
+//     protected repository: Repository<T>;
 
-    protected constructor(repository: Repository<T>) {
-        this.repository = repository;
-    }
+//     protected constructor(repository: Repository<T>) {
+//         this.repository = repository;
+//     }
 
-    async all(relations: string[] = []): Promise<T[]> {
-        return await this.repository.find({ relations });
-    }
+//     async all(relations: string[] = []): Promise<T[]> {
+//         return await this.repository.find({ relations });
+//     }
 
-    async find(options: any, relations = []) {
-        return this.repository.find({ where: options, relations });
-    }
+//     async find(options: any, relations = []) {
+//         return this.repository.find({ where: options, relations });
+//     }
 
-    async create(data: Partial<T>): Promise<T> {
-        return this.repository.save(data as any);
-    }
+//     async create(data: Partial<T>): Promise<T> {
+//         return this.repository.save(data as any);
+//     }
 
-    async update(id: string, data: Partial<T>): Promise<any> {
-        return this.repository.update(id, data as any);
-    }
+//     async update(id: string, data: Partial<T>): Promise<any> {
+//         return this.repository.update(id, data as any);
+//     }
 
-    async delete(id: string): Promise<any> {
-        return this.repository.delete(id);
-    }
+//     async delete(id: string): Promise<any> {
+//         return this.repository.delete(id);
+//     }
 
-    async findOne(options: object, relations: string[] = []): Promise<T | null> {
-        return this.repository.findOne({ where: options, relations } as any);
-    }
+//     async findOne(options: object, relations: string[] = []): Promise<T | null> {
+//         return this.repository.findOne({ where: options, relations } as any);
+//     }
 
-    async total(options: any, relations = []) {
-        const entities = await this.repository.find({ where: options, relations });
-        return {
-            total: entities.length
-        };
-    }
+//     async total(options: any, relations = []) {
+//         const entities = await this.repository.find({ where: options, relations });
+//         return {
+//             total: entities.length
+//         };
+//     }
 
-    async findByEmail(email: string): Promise<T | null> {
-        return this.repository.findOne({ where: { email } } as any);
-    }
+//     async findByEmail(email: string): Promise<T | null> {
+//         return this.repository.findOne({ where: { email } } as any);
+//     }
 
-    async findByUsername(username: string): Promise<T | null> {
-        return this.repository.findOne({ where: { username } } as any);
-    }
+//     async findByUsername(username: string): Promise<T | null> {
+//         return this.repository.findOne({ where: { username } } as any);
+//     }
 
-    async findByUsernameOrEmail(username: string, email: string): Promise<T | null> {
-        return this.repository
-            .createQueryBuilder('user')
-            .where('user.username = :username', { username })
-            .orWhere('user.email = :email', { email })
-            .getOne();
-    }
+//     async findByUsernameOrEmail(username: string, email: string): Promise<T | null> {
+//         return this.repository
+//             .createQueryBuilder('user')
+//             .where('user.username = :username', { username })
+//             .orWhere('user.email = :email', { email })
+//             .getOne();
+//     }
 
-    // ? https://www.phind.com/search?cache=i2helomupthybetydx4fgtvt
-    async paginate(options: FindManyOptions<T>, page: number, take: number, relations = []) {
-        const [data, total] = await this.repository.findAndCount({
-            ...options,
-            take,
-            skip: (page - 1) * take,
-            relations
-        });
+//     // ? https://www.phind.com/search?cache=i2helomupthybetydx4fgtvt
+//     async paginate(options: FindManyOptions<T>, page: number, take: number, relations = []) {
+//         const [data, total] = await this.repository.findAndCount({
+//             ...options,
+//             take,
+//             skip: (page - 1) * take,
+//             relations
+//         });
 
-        return {
-            data,
-            meta: {
-                total,
-                page,
-                last_page: Math.ceil(total / take),
-            },
-        };
-    }
-}
+//         return {
+//             data,
+//             meta: {
+//                 total,
+//                 page,
+//                 last_page: Math.ceil(total / take),
+//             },
+//         };
+//     }
+// }

@@ -1,22 +1,14 @@
-import { DataSource } from "typeorm";
+import logger from './logger.config';
+import mongoose from 'mongoose';
 
-const myDataSource = new DataSource({
-    type: "postgres",
-    host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_PORT || '5432'),
-    username: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DATABASE,
-    logging: false,
-    synchronize: process.env.NODE_ENV === 'development',
-    migrations: [`${__dirname}/../../db/migrations/*{.ts,.js}`],
-    migrationsTableName: 'migrations',
-    entities: ["src/entity/*.ts"],
-    // ssl: true,
-    // entities: [
-    //     "src/entity/*.ts"
-    // ],
-    // synchronize: true,
-});
+const MongoConfig = () => {
+    mongoose.connect(`mongodb+srv://tataran:${process.env.MONGO_PASSWORD}@nodeadmin.yjvkzpx.mongodb.net/node_shop?retryWrites=true&w=majority`)
+        .then(() => logger.info('🗃️ Database has been initialized!'))
+        .catch((err) => logger.error(err));
+    // require('../models/user.schema');
+    // require('../models/product.schema');
+    // require('../models/order.schema');
+    // require('../models/order-item.schema');
+}
 
-export default myDataSource;
+export default MongoConfig;

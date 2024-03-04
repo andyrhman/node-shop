@@ -2,6 +2,8 @@
 node_modules/
 .pgdata/
 uploads/*
+db/migrations/*
+!db/migrations/Readme.md
 !uploads/.gitkeep 
 
 # Logs

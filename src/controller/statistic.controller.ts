@@ -23,14 +23,14 @@ export const Stats = async (req: Request, res: Response) => {
     const review_total = await reviewService.total({});
     const cart_total = await cartService.total({});
 
-    return {
+    res.send({
       user_total: user_total.total,
       product_total: product_total.total,
       order_total: order_total.total,
       orderItem_total: orderItem_total.total,
       review_total: review_total.total,
       cart_total: cart_total.total,
-    };
+    });
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

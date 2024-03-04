@@ -7,12 +7,16 @@ const myDataSource = new DataSource({
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DATABASE,
-    // ssl: true,
-    entities: [
-        "src/entity/*.ts"
-    ],
     logging: false,
-    synchronize: true
+    synchronize: process.env.NODE_ENV === 'development',
+    migrations: [`${__dirname}/../../db/migrations/*{.ts,.js}`],
+    migrationsTableName: 'migrations',
+    entities: ["src/entity/*.ts"],
+    // ssl: true,
+    // entities: [
+    //     "src/entity/*.ts"
+    // ],
+    // synchronize: true,
 });
 
 export default myDataSource;

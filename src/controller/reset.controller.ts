@@ -14,25 +14,25 @@ import { formatValidationErrors } from "../validation/utility/validation.utility
 
 export const Forgot = async (req: Request, res: Response) => {
   try {
-    const email = req.body;
+    const body = req.body;
 
     const userService = new UserService();
     const resetService = new ResetService();
 
-    if (!email) {
+    if (!body.email) {
       return res.status(400).send({ message: "Email must be provided" });
     }
 
     const resetToken = crypto.randomBytes(16).toString("hex");
     const tokenExpiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
-    const checkEmail = await userService.findOne({ email });
+    const checkEmail = await userService.findOne({ email: body.email });
     if (!checkEmail) {
-      return res.status(404).send({ message: "'Email not found!'" });
+      return res.status(404).send({ message: "Email not found!" });
     }
     // Save the reset token and expiration time
     await resetService.create({
       token: resetToken,
-      email,
+      email: body.email,
       expiresAt: tokenExpiresAt,
       used: false, // Token is not used yet
     });
@@ -47,14 +47,15 @@ export const Forgot = async (req: Request, res: Response) => {
     const template = handlebars.compile(source);
 
     const replacements = {
-      name,
+      name: checkEmail.fullName,
       url,
     };
+
     const htmlToSend = template(replacements);
 
     const options = {
       from: "service@mail.com",
-      to: email,
+      to: body.email,
       subject: "Reset Your Password",
       html: htmlToSend,
     };

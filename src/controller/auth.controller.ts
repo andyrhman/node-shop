@@ -64,16 +64,6 @@ export const Login = async (req: Request, res: Response) => {
 
     const body = req.body;
 
-    const checkUser = await repository.findOne({
-      where: { username: body.username, email: body.email },
-    });
-
-    if (checkUser.is_verified === null) {
-      return res.status(401).send({ message: "Please register first" });
-    } else if (!checkUser.is_verified ) {
-      return res.status(401).send({ message: "Please verify your account" });
-    }
-
     let user: User;
 
     // Check whether to find the user by email or username based on input.
@@ -93,6 +83,7 @@ export const Login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(400).send({ message: "Username or Email is Invalid" });
     }
+    
     if (user.is_verified === false) {
       return res
         .status(400)

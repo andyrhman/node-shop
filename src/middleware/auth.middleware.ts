@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { verify } from "jsonwebtoken";
-import { User } from "../entity/user.entity";
+import { User } from "../models/user.schema";
 import myDataSource from "../config/db.config";
 import logger from "../config/logger.config";
 

@@ -15,6 +15,8 @@ export interface OrderDocument extends Document{
     cart: CartDocument[];
     review: ReviewDocument[];
     created_at: Date;
+    total: number,
+    total_orders: number
 }
 
 export const OrderSchema = new Schema<OrderDocument>({

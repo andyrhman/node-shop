@@ -1,7 +1,6 @@
 import { Request, Response } from "express"
 import { verify } from "jsonwebtoken";
 import { User } from "../models/user.schema";
-import myDataSource from "../config/db.config";
 import logger from "../config/logger.config";
 
 export const AuthMiddleware = async (req: Request, res: Response, next: Function) => {
@@ -23,7 +22,7 @@ export const AuthMiddleware = async (req: Request, res: Response, next: Function
         const { scope } = payload;
         const is_admin = scope === 'admin';
 
-        const user = await myDataSource.getRepository(User).findOne({ where: { id: payload.id } });
+        const user = (await User.findOne({ id: payload.id })).toObject();
 
         if (!user.is_verified) {
             return res.status(401).send({ message: "Please verify your account" })

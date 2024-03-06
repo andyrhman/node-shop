@@ -1,12 +1,11 @@
-// import myDataSource from "../config/db.config";
-// import { ProductImages } from "../entity/product-images.entity";
-// import { AbstractService } from "./abstract.service";
+import { ProductImages, ProductImagesDocument } from "../models/product-images.schema";
+import { AbstractService } from "./abstract.service";
 
-// export class ProductImageService extends AbstractService<ProductImages> {
-//   constructor() {
-//     super(myDataSource.getRepository(ProductImages));
-//   }
-//   async deleteMultipleImages(productId: string): Promise<any> {
-//     return this.repository.delete({ productId });
-//   }
-// }
+export class ProductImageService extends AbstractService<ProductImagesDocument> {
+  constructor() {
+    super(ProductImages);
+  }
+  async deleteMultipleImages(productId: string): Promise<any> {
+    return this.model.findOneAndDelete({ productId });
+  }
+}

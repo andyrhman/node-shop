@@ -1,22 +1,22 @@
-// import { Request, Response } from "express";
-// import { plainToClass } from "class-transformer";
-// import { RegisterDto } from "../validation/dto/register.dto";
-// import { validate } from "class-validator";
-// import { formatValidationErrors } from "../validation/utility/validation.utility";
-// import { User } from "../entity/user.entity";
-// import { sign } from "jsonwebtoken";
-// import { eventEmitter } from "../index";
-// import { Token } from "../entity/token.entity";
-// import logger from "../config/logger.config";
-// import myDataSource from "../config/db.config";
-// import transporter from "../config/transporter.config";
-// import * as argon2 from "argon2";
-// import * as crypto from "crypto";
-// import * as fs from "fs";
-// import * as handlebars from "handlebars";
-// // import * as FB from 'fb';
+import { Request, Response } from "express";
+import { plainToClass } from "class-transformer";
+import { RegisterDto } from "../validation/dto/register.dto";
+import { validate } from "class-validator";
+import { formatValidationErrors } from "../validation/utility/validation.utility";
+import { User } from "../models/user.schema";
+import { sign } from "jsonwebtoken";
+import { eventEmitter } from "../index";
+import { Token } from "../models/token.schema";
+import logger from "../config/logger.config";
+import myDataSource from "../config/db.config";
+import transporter from "../config/transporter.config";
+import * as argon2 from "argon2";
+import * as crypto from "crypto";
+import * as fs from "fs";
+import * as handlebars from "handlebars";
+// import * as FB from 'fb';
 // import { TokenService } from "../service/token.service";
-// import { OAuth2Client } from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 
 // export const Register = async (req: Request, res: Response) => {
 //   try {

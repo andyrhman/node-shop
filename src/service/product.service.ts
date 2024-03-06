@@ -1,16 +1,11 @@
-// import myDataSource from "../config/db.config";
-// import { Product } from "../entity/product.entity";
-// import { AbstractService } from "./abstract.service";
+import { Product, ProductDocument } from "../models/product.schema";
+import { AbstractService } from "./abstract.service";
 
-// export class ProductService extends AbstractService<Product> {
-//   constructor() {
-//     super(myDataSource.getRepository(Product));
-//   }
-//   async find(options, relations = []) {
-//     return this.repository.find({
-//       where: options,
-//       relations,
-//       order: { created_at: "DESC" },
-//     });
-//   }
-// }
+export class ProductService extends AbstractService<ProductDocument> {
+  constructor() {
+    super(Product);
+  }
+  async find(options: any) {
+    return this.model.find(options).sort({ createdAt: -1 }).populate('variant', 'category_id');
+  }
+}

@@ -1,75 +1,44 @@
-// import { FindManyOptions, Repository } from 'typeorm';
+import mongoose, { Model } from "mongoose";
 
-// export abstract class AbstractService<T> {
-//     protected repository: Repository<T>;
+export abstract class AbstractService<T extends mongoose.Document<any>> {
+  protected model: Model<T>;
 
-//     protected constructor(repository: Repository<T>) {
-//         this.repository = repository;
-//     }
+  protected constructor(model: Model<T>) {
+    this.model = model;
+  }
 
-//     async all(relations: string[] = []): Promise<T[]> {
-//         return await this.repository.find({ relations });
-//     }
+  async all(): Promise<T[]> {
+    return this.model.find().exec();
+  }
 
-//     async find(options: any, relations = []) {
-//         return this.repository.find({ where: options, relations });
-//     }
+  async create(data: Partial<T>): Promise<T> {
+    const created = new this.model(data);
+    return created.save();
+  }
 
-//     async create(data: Partial<T>): Promise<T> {
-//         return this.repository.save(data as any);
-//     }
+  async update(id: string, data: Partial<T>): Promise<T | null> {
+    return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
+  }
 
-//     async update(id: string, data: Partial<T>): Promise<any> {
-//         return this.repository.update(id, data as any);
-//     }
+  async delete(id: string): Promise<T | null> {
+    return this.model.findByIdAndDelete(id).exec();
+  }
 
-//     async delete(id: string): Promise<any> {
-//         return this.repository.delete(id);
-//     }
+  async findOne(options: object): Promise<T | null> {
+    return this.model.findOne(options).exec();
+  }
 
-//     async findOne(options: object, relations: string[] = []): Promise<T | null> {
-//         return this.repository.findOne({ where: options, relations } as any);
-//     }
+  async findByEmail(email: string): Promise<T | null> {
+    return this.model.findOne({ email }).exec();
+  }
 
-//     async total(options: any, relations = []) {
-//         const entities = await this.repository.find({ where: options, relations });
-//         return {
-//             total: entities.length
-//         };
-//     }
+  async findByUsername(username: string): Promise<T | null> {
+    return this.model.findOne({ username }).exec();
+  }
 
-//     async findByEmail(email: string): Promise<T | null> {
-//         return this.repository.findOne({ where: { email } } as any);
-//     }
-
-//     async findByUsername(username: string): Promise<T | null> {
-//         return this.repository.findOne({ where: { username } } as any);
-//     }
-
-//     async findByUsernameOrEmail(username: string, email: string): Promise<T | null> {
-//         return this.repository
-//             .createQueryBuilder('user')
-//             .where('user.username = :username', { username })
-//             .orWhere('user.email = :email', { email })
-//             .getOne();
-//     }
-
-//     // ? https://www.phind.com/search?cache=i2helomupthybetydx4fgtvt
-//     async paginate(options: FindManyOptions<T>, page: number, take: number, relations = []) {
-//         const [data, total] = await this.repository.findAndCount({
-//             ...options,
-//             take,
-//             skip: (page - 1) * take,
-//             relations
-//         });
-
-//         return {
-//             data,
-//             meta: {
-//                 total,
-//                 page,
-//                 last_page: Math.ceil(total / take),
-//             },
-//         };
-//     }
-// }
+  async findByUsernameOrEmail(username: string, email: string): Promise<T | null> {
+    return this.model.findOne({
+      $or: [{ username }, { email }],
+    }).exec();
+  }
+}

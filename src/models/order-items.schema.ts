@@ -22,8 +22,8 @@ export interface OrderItemsDocument extends Document{
 
 export const OrderItemsSchema = new Schema({
     product_title: {type: String},
-    price: {Number},
-    quantity: {Number},
+    price: {type: Number},
+    quantity: {type: Number},
     variant_id: {type: mongoose.Schema.Types.ObjectId, ref: 'product_variations'},
     order_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Order'},
     product_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Product'},

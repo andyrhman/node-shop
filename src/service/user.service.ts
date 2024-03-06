@@ -1,29 +1,38 @@
-// import myDataSource from "../config/db.config";
-// import { User } from "../entity/user.entity";
-// import { AbstractService } from "./abstract.service";
+import { User, UserDocument } from "../models/user.schema";
+import { AbstractService } from "./abstract.service";
 
-// export class UserService extends AbstractService<User> {
-//   constructor() {
-//     super(myDataSource.getRepository(User));
-//   }
-//   async find(options: any, relations = []) {
-//     return this.repository.find({
-//       where: options,
-//       relations,
-//       order: { created_at: "DESC" },
-//     });
-//   }
-//   async chart(): Promise<any[]> {
-//     const query = `
-//         SELECT
-//         TO_CHAR(u.created_at, 'YYYY-MM-DD') as date,
-//         COUNT(u.id) as count
-//         FROM users u
-//         GROUP BY TO_CHAR(u.created_at, 'YYYY-MM-DD')
-//         ORDER BY TO_CHAR(u.created_at, 'YYYY-MM-DD') ASC;      
-//     `;
-
-//     const result = await this.repository.query(query);
-//     return result;
-//   }
-// }
+export class UserService extends AbstractService<UserDocument> {
+  constructor() {
+    super(User);
+  }
+  async find(options: any) {
+    return this.model.find(options).sort({ createdAt: -1 }).populate('orders');
+  }
+  async chart(): Promise<any[]> {
+    const result = await User.aggregate([
+        {
+          $project: {
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            _id: 0
+          }
+        },
+        {
+          $group: {
+            _id: "$date",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $sort: {
+            _id: 1
+          }
+        }
+     ]);
+    
+     // Format the result to match the SQL output
+     return result.map(item => ({
+        date: item._id,
+        count: item.count
+     }));
+  }
+}

@@ -12,7 +12,7 @@
 // export const Reviews = async (req: Request, res: Response) => {
 //   try {
 //     const reviewService = new ReviewService();
-//     let reviews = await reviewService.find({}, ["user", "product"]);
+//     let reviews = await reviewService.findAndPopUser({}, ["user", "product"]);
 
 //     if (req.query.search) {
 //       const search = req.query.search.toString().toLowerCase();
@@ -46,7 +46,7 @@
 // export const GetReviewsUser = async (req: Request, res: Response) => {
 //   try {
 //     const reviewService = new ReviewService();
-//     res.send(reviewService.find({ product_id: req.params.id }, ["user"]));
+//     res.send(reviewService.findAndPopUsPr({ product_id: req.params.id }, ["user"]));
 //   } catch (error) {
 //     if (process.env.NODE_ENV === "development") {
 //       logger.error(error);

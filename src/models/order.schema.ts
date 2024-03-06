@@ -17,7 +17,7 @@ export interface OrderDocument extends Document{
     created_at: Date;
 }
 
-export const OrderSchema = new Schema({
+export const OrderSchema = new Schema<OrderDocument>({
     transaction_id: {type: String},
     name: {type: String},
     email: {type: String},
@@ -28,6 +28,18 @@ export const OrderSchema = new Schema({
 }, {
     timestamps: {
         createdAt: 'created_at'
+    },
+    virtuals: {
+        total: {
+            get(): number {
+                return this.order_items.reduce((sum: any, i: any) => sum + i.quantity * i.price, 0);
+            }
+        },
+        total_orders: {
+            get(): number {
+                return this.order_items.length;
+            }
+        }
     }
 });
 

@@ -13,8 +13,8 @@ export const eventEmitter = new EventEmitter();
 
 MongoConfig();
 
-// import "./event/auth.listener"
-// import "./event/order.listener"
+import "./event/auth.listener"
+import "./event/order.listener"
 
 const app = express();
 

@@ -15,7 +15,7 @@ eventEmitter.on("user.created", async (user: UserDocument) => {
   await Token.create({
     token,
     email: user.email,
-    user_id: user.id,
+    user_id: user._id,
     expiresAt: tokenExpiresAt,
   });
 

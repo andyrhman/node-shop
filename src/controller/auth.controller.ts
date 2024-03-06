@@ -39,7 +39,7 @@ export const Register = async (req: Request, res: Response) => {
 
     const hashPassword = await argon2.hash(body.password);
 
-    const { password, ...user } = (
+    const { password, cart, orders, verify, review, ...user } = (
       await User.create({
         fullName: body.fullName,
         username: body.username.toLowerCase(),
@@ -79,7 +79,7 @@ export const Login = async (req: Request, res: Response) => {
     if (user.is_verified === false) {
       return res
         .status(400)
-        .send("Please verfiy your email first, before log in.");
+        .send({message: "Please verfiy your email first, before log in."});
     }
 
     if (!(await argon2.verify(user.password, body.password))) {
@@ -244,7 +244,7 @@ export const VerifyAccount = async (req: Request, res: Response) => {
 
     const user = await User.findOne({
       email: userToken.email,
-      id: userToken.user_id,
+      _id: userToken.user_id,
     });
 
     if (!user) {

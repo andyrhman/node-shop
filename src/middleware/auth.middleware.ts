@@ -22,7 +22,7 @@ export const AuthMiddleware = async (req: Request, res: Response, next: Function
         const { scope } = payload;
         const is_admin = scope === 'admin';
 
-        const user = (await User.findOne({ _id: payload.id })).toObject();
+        const {password, cart, orders, verify: any, review, ...user} = (await User.findOne({ _id: payload.id })).toObject();
 
         if (!user.is_verified) {
             return res.status(401).send({ message: "Please verify your account" })

@@ -45,13 +45,13 @@ import {
 //   UpdateCartQuantity,
 // } from "./controller/cart.controller";
 // import { Upload } from "./controller/upload.controller";
-// import {
-//   Address,
-//   CreateAddress,
-//   DeleteAddress,
-//   GetAddress,
-//   UpdateAddress,
-// } from "./controller/address.controller";
+import {
+  Addresses,
+  CreateAddress,
+  DeleteAddress,
+  GetAddress,
+  UpdateAddress,
+} from "./controller/address.controller";
 // import {
 //   ChangeOrderStatus,
 //   ConfirmOrder,
@@ -82,12 +82,12 @@ export const routes = (router: Router) => {
   router.post("/api/verify", ResendVerify);
   router.put("/api/verify/:token", VerifyAccount);
 
-//   // * Address
-//   router.get("/api/admin/address", AuthMiddleware, Address);
-//   router.post("/api/address", userIdMidlleware, CreateAddress);
-//   router.get("/api/address", userIdMidlleware, GetAddress);
-//   router.put("/api/address", userIdMidlleware, UpdateAddress);
-//   router.delete("/api/address", userIdMidlleware, DeleteAddress);
+  // * Address
+  router.get("/api/admin/address", AuthMiddleware, Addresses);
+  router.post("/api/address", userIdMidlleware, CreateAddress);
+  router.get("/api/address", userIdMidlleware, GetAddress);
+  router.put("/api/address", userIdMidlleware, UpdateAddress);
+  router.delete("/api/address", userIdMidlleware, DeleteAddress);
 
 //   // * Category
 //   router.get("/api/categories", Categories);

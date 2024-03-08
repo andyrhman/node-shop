@@ -29,7 +29,8 @@ export const CartSchema = new Schema({
 {
     timestamps: {
         createdAt: 'created_at'
-    }
+    },
+    toJSON: { virtuals: true }
 }
 );
 

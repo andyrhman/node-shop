@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsUUID } from "class-validator";
+import { IsNotEmpty, IsMongoId } from "class-validator";
 
 export class CreateReviewDTO{
     @IsNotEmpty()
@@ -8,7 +8,7 @@ export class CreateReviewDTO{
     comment: string;
 
     @IsNotEmpty()
-    @IsUUID()
+    @IsMongoId()
     product_id: string;
 
     image: string;

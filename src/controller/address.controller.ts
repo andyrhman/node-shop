@@ -1,3 +1,4 @@
+import { AddressDocument } from "./../models/address.schema";
 import { Response, Request } from "express";
 import logger from "../config/logger.config";
 import { AddressService } from "../service/address.service";
@@ -10,7 +11,27 @@ import { AddressUpdateDto } from "../validation/dto/address/update.dto";
 
 export const Addresses = async (req: Request, res: Response) => {
   try {
-    res.send(await Address.find());
+    const address = await Address.find().populate("user_id");
+
+    res.send(
+      address.map((a: AddressDocument) => {
+        return {
+          _id: a._id,
+          street: a.street,
+          city: a.city,
+          province: a.province,
+          zip: a.zip,
+          country: a.country,
+          phone: a.phone,
+          user_id: {
+            id: a.user_id._id,
+            fullName: a.user_id.fullName,
+            username: a.user_id.username,
+            email: a.user_id.email,
+          },
+        };
+      })
+    );
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

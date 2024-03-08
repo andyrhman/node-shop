@@ -13,14 +13,14 @@ import {
   VerifyAccount,
   googleAuth,
 } from "./controller/auth.controller";
-// import {
-//   AdminAllCategories,
-//   Categories,
-//   CreateCategory,
-//   DeleteCategory,
-//   GetCategory,
-//   UpdateCategory,
-// } from "./controller/category.controller";
+import {
+  AdminAllCategories,
+  Categories,
+  CreateCategory,
+  DeleteCategory,
+  GetCategory,
+  UpdateCategory,
+} from "./controller/category.controller";
 // import {
 //   CreateProduct,
 //   DeleteProduct,
@@ -44,7 +44,7 @@ import {
 //   GetUserCart,
 //   UpdateCartQuantity,
 // } from "./controller/cart.controller";
-// import { Upload } from "./controller/upload.controller";
+import { Upload } from "./controller/upload.controller";
 import {
   Addresses,
   CreateAddress,
@@ -89,13 +89,13 @@ export const routes = (router: Router) => {
   router.put("/api/address", userIdMidlleware, UpdateAddress);
   router.delete("/api/address", userIdMidlleware, DeleteAddress);
 
-//   // * Category
-//   router.get("/api/categories", Categories);
-//   router.get("/api/admin/categories", AuthMiddleware, AdminAllCategories);
-//   router.post("/api/admin/category", AuthMiddleware, CreateCategory);
-//   router.get("/api/admin/category/:id", AuthMiddleware, GetCategory);
-//   router.put("/api/admin/category/:id", AuthMiddleware, UpdateCategory);
-//   router.delete("/api/admin/category/:id", AuthMiddleware, DeleteCategory);
+  // * Category
+  router.get("/api/categories", Categories);
+  router.get("/api/admin/categories", AuthMiddleware, AdminAllCategories);
+  router.post("/api/admin/category", AuthMiddleware, CreateCategory);
+  router.get("/api/admin/category/:id", AuthMiddleware, GetCategory);
+  router.put("/api/admin/category/:id", AuthMiddleware, UpdateCategory);
+  router.delete("/api/admin/category/:id", AuthMiddleware, DeleteCategory);
 
 //   // * Product
 //   router.get("/api/products", Products);
@@ -127,9 +127,9 @@ export const routes = (router: Router) => {
 //     DeleteProductVariation
 //   );
 
-//   // * Upload
-//   router.post("/api/admin/upload", AuthMiddleware, Upload);
-//   router.use("/api/uploads", express.static("./uploads"));
+  // * Upload
+  router.post("/api/admin/upload", AuthMiddleware, Upload);
+  router.use("/api/uploads", express.static("./uploads"));
 
 //   // * Cart
 //   router.get("/api/admin/carts", AuthMiddleware, Carts);

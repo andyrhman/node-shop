@@ -9,8 +9,7 @@ export interface AddressDocument extends Document {
   zip: string;
   country: string;
   phone: string;
-  user_id: string;
-  user: UserDocument;
+  user_id: UserDocument;
 }
 
 export const AddressSchema = new Schema({

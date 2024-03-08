@@ -42,7 +42,8 @@ export const OrderSchema = new Schema<OrderDocument>({
                 return this.order_items.length;
             }
         }
-    }
+    },
+    toJSON: { virtuals: true }
 });
 
 export const Order = mongoose.model<OrderDocument>('Order', OrderSchema);

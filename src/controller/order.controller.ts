@@ -4,7 +4,7 @@
 // import { UserService } from "../service/user.service";
 // import { AddressService } from "../service/address.service";
 // import { Order } from "../entity/order.entity";
-// import { isUUID, validate } from "class-validator";
+// import { validate } from "class-validator";
 // import { plainToClass } from "class-transformer";
 // import { CreateOrderDto } from "../validation/dto/orders/create.dto";
 // import { formatValidationErrors } from "../validation/utility/validation.utility";
@@ -17,6 +17,7 @@
 // import Stripe from "stripe";
 // import { ChangeStatusDTO } from "../validation/dto/orders/change-status.dto";
 // import { OrderItemService } from "../service/order-item.service";
+import { isValidObjectId } from "mongoose";
 
 // export const Orders = async (req: Request, res: Response) => {
 //   try {
@@ -99,7 +100,7 @@
 //     const line_items = [];
 
 //     for (let c of body.carts) {
-//       if (!isUUID(c.cart_id)) {
+//       if (!isValidObjectId(c.cart_id)) {
 //         return res.status(400).send({ message: "Invalid UUID format" });
 //       }
 //       const cart: Cart[] = await cartService.find(
@@ -269,7 +270,7 @@
 //       return res.status(400).json(formatValidationErrors(validationErrors));
 //     }
 
-//     if (!isUUID(req.params.id)) {
+//     if (!isValidObjectId(req.params.id)) {
 //       return res.status(400).send({ message: "Invalid UUID format" });
 //     }
 

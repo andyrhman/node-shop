@@ -8,7 +8,10 @@ import { validate } from "class-validator";
 import { isValidObjectId } from "mongoose";
 import { formatValidationErrors } from "../validation/utility/validation.utility";
 import { ProductImages } from "../models/product-images.schema";
-import { ProductVariations } from "../models/product-variation.schema";
+import {
+  ProductVariations,
+  ProductVariationsDocument,
+} from "../models/product-variation.schema";
 import logger from "../config/logger.config";
 import slugify from "slugify";
 import { ProductUpdateDto } from "../validation/dto/products/product-update.dto";
@@ -150,6 +153,8 @@ export const CreateProduct = async (req: Request, res: Response) => {
     }
     const product = await p.save();
 
+    await Category.findByIdAndUpdate(body.category, { product });
+
     res.send(product);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
@@ -172,19 +177,21 @@ export const Variants = async (req: Request, res: Response) => {
 
 export const GetProduct = async (req: Request, res: Response) => {
   try {
-    const product = await Product.findOne({
-      slug: req.params.slug,
-    }).populate("product_images", "variant", "category", {
-      path: "review",
-      populate: {
-        path: "user_id",
-      },
-    });
+    const product = await Product.findOne({ slug: req.params.slug })
+      .populate("product_images")
+      .populate("variant")
+      .populate("category_id", ["_id", "name"])
+      .populate({
+        path: "review",
+        populate: {
+          path: "user",
+        },
+      });
 
     // Add average rating and review count to the product
     const reviewService = new ReviewService();
     const ratingAndReviewCount = await reviewService.getRatingAndReviewCount(
-      product.id
+      product._id
     );
     (product as any).averageRating = ratingAndReviewCount.averageRating;
     (product as any).reviewCount = ratingAndReviewCount.reviewCount;
@@ -199,13 +206,15 @@ export const GetProduct = async (req: Request, res: Response) => {
 };
 
 export const GetProductAdmin = async (req: Request, res: Response) => {
+  if (!isValidObjectId(req.params.id)) {
+    return res.status(400).send({ message: "Invalid Request" });
+  }
   try {
     res.send(
-      await Product.findById(req.params.id).populate(
-        "product_images",
-        "variant",
-        "category"
-      )
+      await Product.findById(req.params.id)
+        .populate("product_images")
+        .populate("variant")
+        .populate("category_id", ["_id", "name"])
     );
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
@@ -266,14 +275,24 @@ export const UpdateProductVariants = async (req: Request, res: Response) => {
       return res.status(404).send({ message: "Invalid Request" });
     }
 
-    for (let v of body.variants) {
-      const productVariant = new ProductVariations();
-      productVariant.name = v;
-      productVariant.product = product.id;
-      await productVariant.save();
-    }
+    // ? https://www.phind.com/search?cache=ljjv98qt433b57qvk0idppe5
+    const newVariants = await Promise.all(
+      body.variants.map(async (variant: any) => {
+        // If variant is a name, create a new variant
+        const newVariant = new ProductVariations({
+          name: variant,
+          product: product.id,
+        });
+        await newVariant.save();
+        return newVariant._id; // Return the new variant's ID
+      })
+    );
 
-    res.send(await ProductVariations.find({ product_id: req.params.id }));
+    await Product.findByIdAndUpdate(product.id, {
+      $push: { variant: { $each: newVariants } },
+    });
+
+    res.send(await ProductVariations.find({ product: req.params.id }));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);
@@ -301,12 +320,22 @@ export const UpdateProductImages = async (req: Request, res: Response) => {
       return res.status(404).send({ message: "Invalid Request" });
     }
 
-    for (let i of body.images) {
-      const productImages = new ProductImages();
-      productImages.productId = req.params.id;
-      productImages.image = i;
-      await productImages.save();
-    }
+    // ? https://www.phind.com/search?cache=ljjv98qt433b57qvk0idppe5
+    const newImages = await Promise.all(
+      body.images.map(async (images: any) => {
+        // If variant is a name, create a new variant
+        const newImage = new ProductImages({
+          productId: req.params.id,
+          image: images,
+        });
+        await newImage.save();
+        return newImage._id; // Return the new variant's ID
+      })
+    );
+
+    await Product.findByIdAndUpdate(product.id, {
+      $push: { product_images: { $each: newImages } },
+    });
 
     res.send(await ProductImages.find({ productId: req.params.id }));
   } catch (error) {
@@ -327,18 +356,25 @@ export const DeleteProduct = async (req: Request, res: Response) => {
       productId: req.params.id,
     });
 
+    // * Find the related variants
+    const findVariants = await productVariantService.find({
+      product: req.params.id,
+    });
+
     // * Delete the multiple images
     for (const image of findImages) {
       await productImageService.deleteMultipleImages(image.productId);
     }
 
     // * Delete the related variants
-    for (const variant of findImages) {
-      await productVariantService.deleteMultipleVariants(variant.productId);
+    for (const variant of findVariants) {
+      await productVariantService.deleteMultipleVariants(variant.product);
     }
 
     // * Delete the product
-    res.send(await Product.findByIdAndDelete(req.params.id));
+    await Product.findByIdAndDelete(req.params.id);
+    
+    res.status(204).send(null);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

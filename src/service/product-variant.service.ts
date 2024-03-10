@@ -5,7 +5,7 @@ export class ProductVariantService extends AbstractService<ProductVariationsDocu
   constructor() {
     super(ProductVariations);
   }
-  async deleteMultipleVariants(product_id: string): Promise<any> {
+  async deleteMultipleVariants(product_id: any): Promise<any> {
     return this.model.findOneAndDelete({ product: product_id });
   }
 }

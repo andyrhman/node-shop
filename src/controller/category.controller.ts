@@ -12,7 +12,7 @@ import { isValidObjectId } from "mongoose";
 export const Categories = async (req: Request, res: Response) => {
   try {
     res.send(
-      await Category.find().populate('product')
+      await Category.find().populate('product', ['_id', 'title', 'slug', 'image', 'price'])
     );
   } catch (error) {
     if (process.env.NODE_ENV === "development") {

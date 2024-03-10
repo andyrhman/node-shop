@@ -19,7 +19,7 @@ export const AddressSchema = new Schema({
   zip: {type: String},
   country: {type: String},
   phone: {type: String},
-  user_id: {type: mongoose.Schema.Types.ObjectId, ref: "User"}
+  user_id: {type: mongoose.Schema.Types.ObjectId, ref: "User", default: undefined}
 }, {
   collection: 'address'
 });

@@ -24,9 +24,9 @@ export const OrderSchema = new Schema<OrderDocument>({
     name: {type: String},
     email: {type: String},
     completed: {type: Boolean},
-    user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-    order_items: [{type: mongoose.Schema.Types.ObjectId, ref: 'order_items'}],
-    review: [{type: mongoose.Schema.Types.ObjectId, ref: 'Review'}]
+    user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User', default: undefined},
+    order_items: {type: [mongoose.Schema.Types.ObjectId], ref: 'order_items', default: undefined},
+    review: {type: [mongoose.Schema.Types.ObjectId], ref: 'Review', default: undefined}
 }, {
     timestamps: {
         createdAt: 'created_at'

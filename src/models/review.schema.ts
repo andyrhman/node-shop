@@ -18,9 +18,9 @@ export const ReviewSchema = new Schema({
     star: {type: Number},
     comment: {type: String},
     image: {type: String},
-    user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-    product_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Product'}, 
-    order_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Order'}
+    user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User', default: undefined},
+    product_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: undefined}, 
+    order_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Order', default: undefined}
 }, {
     timestamps: {
         createdAt: 'created_at'

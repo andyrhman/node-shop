@@ -21,10 +21,10 @@ export const CartSchema = new Schema({
     product_title: {type: String},
     quantity: {type: Number},
     price: {type: Number},
-    variant_id: {type: mongoose.Schema.Types.ObjectId, ref: 'product_variations'},
-    product_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Product'},
-    user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-    order_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Order'},
+    variant_id: {type: mongoose.Schema.Types.ObjectId, ref: 'product_variations', default: undefined},
+    product_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: undefined},
+    user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User', default: undefined},
+    order_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Order', default: undefined},
 },
 {
     timestamps: {

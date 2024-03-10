@@ -85,6 +85,7 @@ export const Products = async (req: Request, res: Response) => {
         return 0;
       });
     }
+
     res.send(products);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
@@ -105,6 +106,9 @@ export const CreateProduct = async (req: Request, res: Response) => {
       return res.status(400).json(formatValidationErrors(validationErrors));
     }
 
+    if (!isValidObjectId(body.category)) {
+      return res.status(400).send({ message: "Invalid UUID format" });
+    }
     const category = await Category.findById(body.category);
 
     const p = new Product();
@@ -119,29 +123,32 @@ export const CreateProduct = async (req: Request, res: Response) => {
     p.image = body.image;
     p.price = body.price;
 
-    if (!isValidObjectId(body.category)) {
-      return res.status(400).send({ message: "Invalid UUID format" });
-    }
+    // Initialize product_images and variant as empty arrays
+    // ? https://www.phind.com/search?cache=aif0qe2bebiiu3jz57i94oe7
+    p.product_images = [];
+    p.variant = [];
+
     if (!category) {
       return res.status(400).send({ message: "Category does not exists" });
     }
     p.category_id = body.category;
 
-    const product = await p.save();
-
     for (let i of body.images) {
       const productImages = new ProductImages();
-      productImages.productId = product.id;
+      productImages.productId = p.id;
       productImages.image = i;
       await productImages.save();
+      p.product_images.push(productImages);
     }
 
     for (let v of body.variants) {
       const productVariant = new ProductVariations();
       productVariant.name = v;
-      productVariant.product = product.id;
+      productVariant.product = p.id;
       await productVariant.save();
+      p.variant.push(productVariant);
     }
+    const product = await p.save();
 
     res.send(product);
   } catch (error) {
@@ -152,234 +159,226 @@ export const CreateProduct = async (req: Request, res: Response) => {
   }
 };
 
-// export const Variants = async (req: Request, res: Response) => {
-//   try {
-//     res.send(await myDataSource.getRepository(ProductVariation).find({}));
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+export const Variants = async (req: Request, res: Response) => {
+  try {
+    res.send(await ProductVariations.find());
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const GetProduct = async (req: Request, res: Response) => {
-//   try {
-//     const product = await myDataSource.getRepository(Product).findOne({
-//       where: { slug: req.params.slug },
-//       relations: [
-//         "product_images",
-//         "variant",
-//         "category",
-//         // "review",
-//         // "review.user",
-//       ],
-//     });
+export const GetProduct = async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findOne({
+      slug: req.params.slug,
+    }).populate("product_images", "variant", "category", {
+      path: "review",
+      populate: {
+        path: "user_id",
+      },
+    });
 
-//     // Add average rating and review count to the product
-//     // const ratingAndReviewCount =
-//     //   await this.reviewService.getRatingAndReviewCount(product.id);
-//     // (product as any).averageRating = ratingAndReviewCount.averageRating;
-//     // (product as any).reviewCount = ratingAndReviewCount.reviewCount;
+    // Add average rating and review count to the product
+    const reviewService = new ReviewService();
+    const ratingAndReviewCount = await reviewService.getRatingAndReviewCount(
+      product.id
+    );
+    (product as any).averageRating = ratingAndReviewCount.averageRating;
+    (product as any).reviewCount = ratingAndReviewCount.reviewCount;
 
-//     res.send(product);
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+    res.send(product);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const GetProductAdmin = async (req: Request, res: Response) => {
-//   try {
-//     res.send(
-//       await myDataSource.getRepository(Product).findOne({
-//         where: { id: req.params.id },
-//         relations: ["product_images", "variant", "category"],
-//       })
-//     );
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+export const GetProductAdmin = async (req: Request, res: Response) => {
+  try {
+    res.send(
+      await Product.findById(req.params.id).populate(
+        "product_images",
+        "variant",
+        "category"
+      )
+    );
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const UpdateProduct = async (req: Request, res: Response) => {
-//   try {
-//     const body = req.body;
-//     const repository = myDataSource.getRepository(Product);
-//     const input = plainToClass(ProductUpdateDto, body);
-//     const validationErrors = await validate(input);
+export const UpdateProduct = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const input = plainToClass(ProductUpdateDto, body);
+    const validationErrors = await validate(input);
 
-//     if (validationErrors.length > 0) {
-//       // Use the utility function to format and return the validation errors
-//       return res.status(400).json(formatValidationErrors(validationErrors));
-//     }
+    if (validationErrors.length > 0) {
+      // Use the utility function to format and return the validation errors
+      return res.status(400).json(formatValidationErrors(validationErrors));
+    }
 
-//     if (!isValidObjectId(req.params.id)) {
-//       return res.status(400).send({ message: "Invalid Request" });
-//     }
-//     const products = await repository.findOne({ where: { id: req.params.id } });
-//     if (!products) {
-//       return res.status(404).send({ message: "Invalid Request" });
-//     }
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).send({ message: "Invalid Request" });
+    }
+    const products = await Product.findById(req.params.id);
+    if (!products) {
+      return res.status(404).send({ message: "Invalid Request" });
+    }
 
-//     await repository.update(req.params.id, body);
+    const data = await Product.findByIdAndUpdate(req.params.id, body, {
+      new: true,
+    });
 
-//     res.send(await repository.findOne({ where: { id: req.params.id } }));
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+    res.send(data);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const UpdateProductVariants = async (req: Request, res: Response) => {
-//   try {
-//     const body = req.body;
-//     const repository = myDataSource.getRepository(Product);
-//     const input = plainToClass(ProductUpdateDto, body);
-//     const validationErrors = await validate(input);
+export const UpdateProductVariants = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const input = plainToClass(ProductUpdateDto, body);
+    const validationErrors = await validate(input);
 
-//     if (validationErrors.length > 0) {
-//       // Use the utility function to format and return the validation errors
-//       return res.status(400).json(formatValidationErrors(validationErrors));
-//     }
+    if (validationErrors.length > 0) {
+      // Use the utility function to format and return the validation errors
+      return res.status(400).json(formatValidationErrors(validationErrors));
+    }
 
-//     if (!isValidObjectId(req.params.id)) {
-//       return res.status(400).send({ message: "Invalid Request" });
-//     }
-//     const product = await repository.findOne({ where: { id: req.params.id } });
-//     if (!product) {
-//       return res.status(404).send({ message: "Invalid Request" });
-//     }
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).send({ message: "Invalid Request" });
+    }
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).send({ message: "Invalid Request" });
+    }
 
-//     for (let v of body.variants) {
-//       const productVariant = new ProductVariation();
-//       productVariant.name = v;
-//       productVariant.product_id = product.id;
-//       await myDataSource.getRepository(ProductVariation).save(productVariant);
-//     }
+    for (let v of body.variants) {
+      const productVariant = new ProductVariations();
+      productVariant.name = v;
+      productVariant.product = product.id;
+      await productVariant.save();
+    }
 
-//     res.send(
-//       await myDataSource
-//         .getRepository(ProductVariation)
-//         .find({ where: { product_id: req.params.id } })
-//     );
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+    res.send(await ProductVariations.find({ product_id: req.params.id }));
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const UpdateProductImages = async (req: Request, res: Response) => {
-//   try {
-//     const body = req.body;
-//     const repository = myDataSource.getRepository(Product);
-//     const input = plainToClass(ProductUpdateDto, body);
-//     const validationErrors = await validate(input);
+export const UpdateProductImages = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const input = plainToClass(ProductUpdateDto, body);
+    const validationErrors = await validate(input);
 
-//     if (validationErrors.length > 0) {
-//       // Use the utility function to format and return the validation errors
-//       return res.status(400).json(formatValidationErrors(validationErrors));
-//     }
+    if (validationErrors.length > 0) {
+      // Use the utility function to format and return the validation errors
+      return res.status(400).json(formatValidationErrors(validationErrors));
+    }
 
-//     if (!isValidObjectId(req.params.id)) {
-//       return res.status(400).send({ message: "Invalid Request" });
-//     }
-//     const product = await repository.findOne({ where: { id: req.params.id } });
-//     if (!product) {
-//       return res.status(404).send({ message: "Invalid Request" });
-//     }
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).send({ message: "Invalid Request" });
+    }
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).send({ message: "Invalid Request" });
+    }
 
-//     for (let i of body.images) {
-//       const productImages = new ProductImages();
-//       productImages.productId = req.params.id;
-//       productImages.image = i;
-//       await myDataSource.getRepository(ProductImages).save(productImages);
-//     }
+    for (let i of body.images) {
+      const productImages = new ProductImages();
+      productImages.productId = req.params.id;
+      productImages.image = i;
+      await productImages.save();
+    }
 
-//     res.send(
-//       await myDataSource
-//         .getRepository(ProductImages)
-//         .find({ where: { productId: req.params.id } })
-//     );
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+    res.send(await ProductImages.find({ productId: req.params.id }));
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const DeleteProduct = async (req: Request, res: Response) => {
-//   try {
-//     const productImageService = new ProductImageService();
-//     const productVariantService = new ProductVariantService();
+export const DeleteProduct = async (req: Request, res: Response) => {
+  try {
+    const productImageService = new ProductImageService();
+    const productVariantService = new ProductVariantService();
 
-//     // * Find the related images
-//     const findImages = await productImageService.find({
-//       productId: req.params.id,
-//     });
+    // * Find the related images
+    const findImages = await productImageService.find({
+      productId: req.params.id,
+    });
 
-//     // * Delete the multiple images
-//     for (const image of findImages) {
-//       await productImageService.deleteMultipleImages(image.productId);
-//     }
+    // * Delete the multiple images
+    for (const image of findImages) {
+      await productImageService.deleteMultipleImages(image.productId);
+    }
 
-//     // * Delete the related variants
-//     for (const variant of findImages) {
-//       await productVariantService.deleteMultipleVariants(variant.productId);
-//     }
+    // * Delete the related variants
+    for (const variant of findImages) {
+      await productVariantService.deleteMultipleVariants(variant.productId);
+    }
 
-//     // * Delete the product
-//     res.send(await myDataSource.getRepository(Product).delete(req.params.id));
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+    // * Delete the product
+    res.send(await Product.findByIdAndDelete(req.params.id));
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const DeleteProductImage = async (req: Request, res: Response) => {
-//   try {
-//     await myDataSource.getRepository(ProductImages).delete(req.params.id);
-//     res.status(204).send(null);
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+export const DeleteProductImage = async (req: Request, res: Response) => {
+  try {
+    await ProductImages.findByIdAndDelete(req.params.id);
+    res.status(204).send(null);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const DeleteProductVariation = async (req: Request, res: Response) => {
-//   try {
-//     await myDataSource.getRepository(ProductVariation).delete(req.params.id);
-//     res.status(204).send(null);
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+export const DeleteProductVariation = async (req: Request, res: Response) => {
+  try {
+    await ProductVariations.findByIdAndDelete(req.params.id);
+    res.status(204).send(null);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};
 
-// export const GetProductAvgRating = async (req: Request, res: Response) => {
-//   try {
-//     const reviewService = new ReviewService();
-//     res.send(await reviewService.calculateAverageRating(req.params.id));
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+export const GetProductAvgRating = async (req: Request, res: Response) => {
+  try {
+    const reviewService = new ReviewService();
+    res.send(await reviewService.calculateAverageRating(req.params.id));
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      logger.error(error);
+    }
+    return res.status(400).send({ message: "Invalid Request" });
+  }
+};

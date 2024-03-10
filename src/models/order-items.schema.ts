@@ -24,9 +24,9 @@ export const OrderItemsSchema = new Schema({
     product_title: {type: String},
     price: {type: Number},
     quantity: {type: Number},
-    variant_id: {type: mongoose.Schema.Types.ObjectId, ref: 'product_variations'},
-    order_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Order'},
-    product_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Product'},
+    variant_id: {type: mongoose.Schema.Types.ObjectId, ref: 'product_variations', default: undefined},
+    order_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Order', default: undefined},
+    product_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: undefined},
     status: {
         type: String,
         enum: Object.values(OrderItemStatus),

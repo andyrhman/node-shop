@@ -30,11 +30,11 @@ export const UserSchema = new Schema(
     password: { type: String },
     is_user: { type: Boolean, default: true },
     is_verified: { type: Boolean, default: false },
-    address: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
-    cart: [{ type: mongoose.Schema.Types.ObjectId, ref: "Cart" }],
-    orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
-    verify: [{ type: mongoose.Schema.Types.ObjectId, ref: "user_token" }],
-    review: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
+    address: { type: mongoose.Schema.Types.ObjectId, ref: "Address", default: undefined},
+    cart: {type: [mongoose.Schema.Types.ObjectId], ref: "Cart", default: undefined },
+    orders: {type: [mongoose.Schema.Types.ObjectId], ref: "Order", default: undefined },
+    verify: {type: [mongoose.Schema.Types.ObjectId], ref: "user_token", default: undefined },
+    review: {type: [mongoose.Schema.Types.ObjectId], ref: "Review", default: undefined },
   },
   {
     timestamps: {

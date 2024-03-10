@@ -13,9 +13,9 @@ export interface ProductVariationsDocument extends Document {
 
 export const ProductVariationsSchema = new Schema({
   name: {type: String},
-  product: {type: mongoose.Schema.Types.ObjectId, ref: 'Product'},
-  cart: [{type: mongoose.Schema.Types.ObjectId, ref: 'Cart'}],
-  order_items: [{type: mongoose.Schema.Types.ObjectId, ref: 'order_items'}]
+  product: {type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: undefined},
+  cart: {type: [mongoose.Schema.Types.ObjectId], ref: 'Cart', default: undefined},
+  order_items: {type: [mongoose.Schema.Types.ObjectId], ref: 'order_items', default: undefined}
 });
 
 export const ProductVariations = mongoose.model<ProductVariationsDocument>("product_variations", ProductVariationsSchema)

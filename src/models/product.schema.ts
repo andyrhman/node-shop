@@ -29,12 +29,13 @@ export const ProductSchema = new Schema({
   description: {type: String},
   image: {type: String},
   price: {type: Number},
-  category_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Category'},
-  product_images: [{type: mongoose.Schema.Types.ObjectId, ref: 'product_images'}],
-  variant: [{type: mongoose.Schema.Types.ObjectId, ref: 'product_variations'}],
-  cart: [{type: mongoose.Schema.Types.ObjectId, ref: 'Cart'}],
-  order_item: [{type: mongoose.Schema.Types.ObjectId, ref: 'order_items'}],
-  review: [{type: mongoose.Schema.Types.ObjectId, ref: 'Review'}],
+  category_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: undefined},
+  // ? https://www.phind.com/search?cache=aif0qe2bebiiu3jz57i94oe7
+  product_images: {type: [mongoose.Schema.Types.ObjectId], ref: 'product_images', default: undefined},
+  variant: {type: [mongoose.Schema.Types.ObjectId], ref: 'product_variations', default: undefined},
+  cart: {type: [mongoose.Schema.Types.ObjectId],ref: 'Cart', default: undefined},
+  order_item: {type: [mongoose.Schema.Types.ObjectId], ref: 'order_items', default: undefined},
+  review: {type: [mongoose.Schema.Types.ObjectId], ref: 'Review', default: undefined},
 }, {
   timestamps: {
     createdAt: 'created_at',

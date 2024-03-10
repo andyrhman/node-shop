@@ -11,6 +11,10 @@ export abstract class AbstractService<T extends mongoose.Document<any>> {
     return this.model.find().exec();
   }
 
+  async find(options: any): Promise<T[]> {
+    return this.model.find(options).exec();
+  }
+
   async create(data: Partial<T>): Promise<T> {
     const created = new this.model(data);
     return created.save();

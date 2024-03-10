@@ -9,7 +9,7 @@ export interface CategoryDocument extends Document {
 
 export const CategorySchema = new Schema({
     name: {type: String},
-    product: [{type: mongoose.Schema.Types.ObjectId, ref: 'Product'}]
+    product: {type: [mongoose.Schema.Types.ObjectId], ref: 'Product', default: undefined}
 });
 
 export const Category = mongoose.model<CategoryDocument>("Category", CategorySchema);

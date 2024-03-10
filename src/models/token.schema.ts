@@ -15,7 +15,7 @@ export const TokenSchema = new Schema({
     token: {type: String},
     expiresAt: {type: Number},
     user: {type: Boolean},
-    user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}
+    user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User', default: undefined}
 },{
   collection: 'user_token'
 }

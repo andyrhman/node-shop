@@ -21,20 +21,20 @@ import {
   GetCategory,
   UpdateCategory,
 } from "./controller/category.controller";
-// import {
-//   CreateProduct,
-//   DeleteProduct,
-//   DeleteProductImage,
-//   DeleteProductVariation,
-//   GetProduct,
-//   GetProductAdmin,
-//   GetProductAvgRating,
-//   Products,
-//   UpdateProduct,
-//   UpdateProductImages,
-//   UpdateProductVariants,
-//   Variants,
-// } from "./controller/product.controller";
+import {
+  CreateProduct,
+  DeleteProduct,
+  DeleteProductImage,
+  DeleteProductVariation,
+  GetProduct,
+  GetProductAdmin,
+  GetProductAvgRating,
+  Products,
+  UpdateProduct,
+  UpdateProductImages,
+  UpdateProductVariants,
+  Variants,
+} from "./controller/product.controller";
 // import {
 //   Carts,
 //   CreateCart,
@@ -97,35 +97,35 @@ export const routes = (router: Router) => {
   router.put("/api/admin/category/:id", AuthMiddleware, UpdateCategory);
   router.delete("/api/admin/category/:id", AuthMiddleware, DeleteCategory);
 
-//   // * Product
-//   router.get("/api/products", Products);
-//   router.get("/api/product/rating/:id", GetProductAvgRating);
-//   router.post("/api/admin/products", AuthMiddleware, CreateProduct);
-//   router.get("/api/variants", Variants);
-//   router.get("/api/product/:slug", GetProduct);
-//   router.get("/api/admin/product/:id", AuthMiddleware, GetProductAdmin);
-//   router.put("/api/admin/product/:id", AuthMiddleware, UpdateProduct);
-//   router.put(
-//     "/api/admin/product-variants/:id",
-//     AuthMiddleware,
-//     UpdateProductVariants
-//   );
-//   router.put(
-//     "/api/admin/product-images/:id",
-//     AuthMiddleware,
-//     UpdateProductImages
-//   );
-//   router.delete("/api/admin/product/:id", AuthMiddleware, DeleteProduct);
-//   router.delete(
-//     "/api/admin/product-images/:id",
-//     AuthMiddleware,
-//     DeleteProductImage
-//   );
-//   router.delete(
-//     "/api/admin/product-variants/:id",
-//     AuthMiddleware,
-//     DeleteProductVariation
-//   );
+  // * Product
+  router.get("/api/products", Products);
+  router.get("/api/product/rating/:id", GetProductAvgRating);
+  router.post("/api/admin/products", AuthMiddleware, CreateProduct);
+  router.get("/api/variants", Variants);
+  router.get("/api/product/:slug", GetProduct);
+  router.get("/api/admin/product/:id", AuthMiddleware, GetProductAdmin);
+  router.put("/api/admin/product/:id", AuthMiddleware, UpdateProduct);
+  router.put(
+    "/api/admin/product-variants/:id",
+    AuthMiddleware,
+    UpdateProductVariants
+  );
+  router.put(
+    "/api/admin/product-images/:id",
+    AuthMiddleware,
+    UpdateProductImages
+  );
+  router.delete("/api/admin/product/:id", AuthMiddleware, DeleteProduct);
+  router.delete(
+    "/api/admin/product-images/:id",
+    AuthMiddleware,
+    DeleteProductImage
+  );
+  router.delete(
+    "/api/admin/product-variants/:id",
+    AuthMiddleware,
+    DeleteProductVariation
+  );
 
   // * Upload
   router.post("/api/admin/upload", AuthMiddleware, Upload);

@@ -21,6 +21,7 @@ export const CartSchema = new Schema({
     product_title: {type: String},
     quantity: {type: Number},
     price: {type: Number},
+    completed: {type: Boolean, default: false},
     variant_id: {type: mongoose.Schema.Types.ObjectId, ref: 'product_variations', default: undefined},
     product_id: {type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: undefined},
     user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User', default: undefined},

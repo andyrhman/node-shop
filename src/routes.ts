@@ -35,15 +35,15 @@ import {
   UpdateProductVariants,
   Variants,
 } from "./controller/product.controller";
-// import {
-//   Carts,
-//   CreateCart,
-//   DeleteCart,
-//   GetAuthUserCart,
-//   GetTotalCart,
-//   GetUserCart,
-//   UpdateCartQuantity,
-// } from "./controller/cart.controller";
+import {
+  Carts,
+  CreateCart,
+  DeleteCart,
+  GetAuthUserCart,
+  GetTotalCart,
+  GetUserCart,
+  UpdateCartQuantity,
+} from "./controller/cart.controller";
 import { Upload } from "./controller/upload.controller";
 import {
   Addresses,
@@ -131,14 +131,14 @@ export const routes = (router: Router) => {
   router.post("/api/admin/upload", AuthMiddleware, Upload);
   router.use("/api/uploads", express.static("./uploads"));
 
-//   // * Cart
-//   router.get("/api/admin/carts", AuthMiddleware, Carts);
-//   router.get("/api/admin/carts/:id", AuthMiddleware, GetUserCart);
-//   router.post("/api/cart", userIdMidlleware, CreateCart);
-//   router.get("/api/cart", userIdMidlleware, GetAuthUserCart);
-//   router.put("/api/cart/:id", userIdMidlleware, UpdateCartQuantity);
-//   router.delete("/api/cart/:cart_id", userIdMidlleware, DeleteCart);
-//   router.get("/api/cart-total", userIdMidlleware, GetTotalCart);
+  // * Cart
+  router.get("/api/admin/carts", AuthMiddleware, Carts);
+  router.get("/api/admin/carts/:id", AuthMiddleware, GetUserCart);
+  router.post("/api/cart", userIdMidlleware, CreateCart);
+  router.get("/api/cart", userIdMidlleware, GetAuthUserCart);
+  router.put("/api/cart/:id", userIdMidlleware, UpdateCartQuantity);
+  router.delete("/api/cart/:id", userIdMidlleware, DeleteCart);
+  router.get("/api/cart-total", userIdMidlleware, GetTotalCart);
 
 //   // * Order
 //   router.get("/api/admin/orders", AuthMiddleware, Orders);

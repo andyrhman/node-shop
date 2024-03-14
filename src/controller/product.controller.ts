@@ -8,10 +8,7 @@ import { validate } from "class-validator";
 import { isValidObjectId } from "mongoose";
 import { formatValidationErrors } from "../validation/utility/validation.utility";
 import { ProductImages } from "../models/product-images.schema";
-import {
-  ProductVariations,
-  ProductVariationsDocument,
-} from "../models/product-variation.schema";
+import { ProductVariations } from "../models/product-variation.schema";
 import logger from "../config/logger.config";
 import slugify from "slugify";
 import { ProductUpdateDto } from "../validation/dto/products/product-update.dto";
@@ -373,7 +370,7 @@ export const DeleteProduct = async (req: Request, res: Response) => {
 
     // * Delete the product
     await Product.findByIdAndDelete(req.params.id);
-    
+
     res.status(204).send(null);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {

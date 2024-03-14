@@ -52,14 +52,14 @@ import {
   GetAddress,
   UpdateAddress,
 } from "./controller/address.controller";
-// import {
-//   ChangeOrderStatus,
-//   ConfirmOrder,
-//   CreateOrder,
-//   GetOrderItem,
-//   GetUserOrder,
-//   Orders,
-// } from "./controller/order.controller";
+import {
+  ChangeOrderStatus,
+  ConfirmOrder,
+  CreateOrder,
+  GetOrderItem,
+  GetUserOrder,
+  Orders,
+} from "./controller/order.controller";
 // import { CartsStat, OrdersStat, Stats, UsersStat } from "./controller/statistic.controller";
 // import { CreateReview, GetReviewAdmin, GetReviewsUser, Reviews } from "./controller/review.controller";
 // import { Forgot, Reset } from "./controller/reset.controller";
@@ -140,13 +140,13 @@ export const routes = (router: Router) => {
   router.delete("/api/cart/:id", userIdMidlleware, DeleteCart);
   router.get("/api/cart-total", userIdMidlleware, GetTotalCart);
 
-//   // * Order
-//   router.get("/api/admin/orders", AuthMiddleware, Orders);
-//   router.post("/api/checkout/orders", userIdMidlleware, CreateOrder);
-//   router.post("/api/checkout/orders/confirm", userIdMidlleware, ConfirmOrder);
-//   router.get("/api/order-user", userIdMidlleware, GetUserOrder);
-//   router.get("/api/admin/order-items/:id", AuthMiddleware, GetOrderItem);
-//   router.put("/api/admin/orders/:id", AuthMiddleware, ChangeOrderStatus);
+  // * Order
+  router.get("/api/admin/orders", AuthMiddleware, Orders);
+  router.post("/api/checkout/orders", userIdMidlleware, CreateOrder);
+  router.post("/api/checkout/orders/confirm", userIdMidlleware, ConfirmOrder);
+  router.get("/api/order-user", userIdMidlleware, GetUserOrder);
+  router.get("/api/admin/order-items/:id", AuthMiddleware, GetOrderItem);
+  router.put("/api/admin/orders/:id", AuthMiddleware, ChangeOrderStatus);
 
 //   // * Review
 //   router.get('/api/admin/reviews', AuthMiddleware, Reviews);

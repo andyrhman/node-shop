@@ -38,29 +38,19 @@ export class CartService extends AbstractService<CartDocument> {
   //       .getOne();
   //   }
 
+  // ? Alterative https://www.phind.com/search?cache=dhdf2a4dvunbm8l2flsh8kbq
   async findUserCart(options: any) {
     const cartItems = await this.model
       .find(options)
       .populate("variant_id")
       .populate("product_id")
       .populate("order_id");
-
-    // Calculate the total price for each item and sum up the total prices of all items
-    let totalCartPrice = 0;
-    const cartWithTotalPrices = cartItems.map((item: any) => {
-      const itemTotalPrice = item.price * item.quantity;
-      totalCartPrice += itemTotalPrice;
-      return {
-        ...item._doc,
-        total_price: itemTotalPrice,
-      };
-    });
-
-    // Add the total price of the cart to the response
-    return {
-      items: cartWithTotalPrices,
-      total_price: totalCartPrice,
-    };
+    // map through the cart items and calculate the total price for each item
+    const cartWithTotalPrices = cartItems.map((item: any) => ({
+      ...item._doc,
+      total_price: item.price * item.quantity,
+    }));
+    return cartWithTotalPrices;
   }
 
   async chart(): Promise<any[]> {

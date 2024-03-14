@@ -5,7 +5,7 @@ import { CreateCartDTO } from "../validation/dto/carts/create.dto";
 import { plainToClass } from "class-transformer";
 import { validate } from "class-validator";
 import { formatValidationErrors } from "../validation/utility/validation.utility";
-import { Cart } from "../models/cart.schema";
+import { Cart, CartDocument } from "../models/cart.schema";
 import { UpdateCartDto } from "../validation/dto/carts/update.dto";
 import { Product } from "../models/product.schema";
 import { ProductVariations } from "../models/product-variation.schema";
@@ -68,7 +68,26 @@ export const Carts = async (req: Request, res: Response) => {
       });
     }
 
-    res.send(carts);
+    res.send(carts.map((c: CartDocument) => {
+      return {
+        _id: c._id,
+        product_title: c.product_title,
+        quantity: c.quantity,
+        price: c.price,
+        completed: c.completed,
+        variant_id: c.variant_id,
+        product_id: c.product_id,
+        user_id: {
+            _id: c.user_id._id,
+            fullName: c.user_id.fullName,
+            username: c.user_id.username,
+            email: c.user_id.email,
+            id: c.user_id._id
+        },
+        created_at: c.created_at,
+        id: c._id
+      }
+    }));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

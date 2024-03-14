@@ -24,9 +24,8 @@ export const Orders = async (req: Request, res: Response) => {
   try {
     let search = req.query.search;
 
-    let orders = await Order.find({})
-      .populate("order_items")
-      .populate({ path: "order_items", populate: { path: "user_id" } });
+    let orders = await Order.find()
+      .populate({ path: "order_items", populate: { path: "product_id" } });
 
     if (typeof search === "string") {
       search = sanitizeHtml(search);

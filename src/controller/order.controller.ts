@@ -203,7 +203,11 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
     .populate({path: 'order_items', populate: {path: 'variant_id'}});
 
     if (!order) {
-      return res.status(404).send("Order not found");
+      return res.status(404).send({message: "Order not found"});
+    }
+
+    if (order.user_id.toString() !== user) {
+      return res.status(403).send({message: "Not Allowed!"});
     }
 
     const carts: CartDocument[] = await cartService.find({
@@ -226,6 +230,8 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
       });
     }
     await orderService.update(order._id, { completed: true });
+
+    await User.findByIdAndUpdate(order.user_id, { $push: {orders: order}});
 
     eventEmitter.emit("order.completed", order);
 

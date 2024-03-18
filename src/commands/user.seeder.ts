@@ -2,24 +2,33 @@ require('dotenv').config();
 import { fakerID_ID as faker } from "@faker-js/faker";
 import { User } from "../models/user.schema";
 import mongoose from "mongoose";
-import seederSource from '../config/seeder.config';
 import logger from '../config/logger.config';
 import * as argon2 from 'argon2';
+import { Cart, CartDocument } from "../models/cart.schema";
 
 mongoose.connect(`mongodb+srv://tataran:${process.env.MONGO_PASSWORD}@nodeadmin.yjvkzpx.mongodb.net/node_shop?retryWrites=true&w=majority`).then(async () => {
 
     const password = await argon2.hash("123123");
-
+    
     // * Creating 30 users by using for loop.
     // ? You could also use map here's the link https://www.phind.com/search?cache=fp0nc4vds36gdwixhj9mhtmc
     for (let i = 0; i < 30; i++) {
-        await User.create({
-            fullName: faker.person.fullName(),
-            username: faker.internet.userName().toLowerCase(),
-            email: faker.internet.email().toLowerCase(),
-            password,
-            is_verified: true
-        });
+        const user = new User();
+
+        user.fullName = faker.person.fullName();
+        user.username = faker.internet.userName().toLowerCase();
+        user.email = faker.internet.email().toLowerCase();
+        user.password = password;
+        user.is_verified = true;
+        user.cart = [];
+        user.orders = [];
+        user.verify = [];
+        user.review = [];
+
+        // const carts = await Cart.find({user_id: user});
+        // user.cart = carts;
+
+        await user.save();
     }
 
     logger.info("🌱 Seeding has been completed")

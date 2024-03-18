@@ -2,7 +2,7 @@ require('dotenv').config();
 import { Category } from "../models/category.schema";
 import { fakerID_ID as faker } from "@faker-js/faker";
 import { randomInt } from "crypto";
-import { Product } from "../models/product.schema";
+import { Product, ProductDocument } from "../models/product.schema";
 import { ProductImages } from "../models/product-images.schema";
 import { ProductVariations } from "../models/product-variation.schema";
 import mongoose from "mongoose";
@@ -20,30 +20,36 @@ mongoose.connect(`mongodb+srv://tataran:${process.env.MONGO_PASSWORD}@nodeadmin.
             trim: true
         });
         // * For the product.
-        const product = await Product.create({
-            title: title,
-            slug: slug,
-            description: faker.commerce.productDescription(),
-            image: faker.image.urlLoremFlickr({ width: 200, height: 200, category: 'food' }),
-            price: parseInt(faker.commerce.price({ min: 100000, max: 5000000, dec: 0 })),
-            cart: [],
-            category_id: categories[i % categories.length]._id
-        });
+        let product: any = new Product();
+
+        product.title = title;
+        product.slug = slug;
+        product.description = faker.commerce.productDescription();
+        product.image = faker.image.urlLoremFlickr({ width: 200, height: 200, category: 'food' });
+        product.price = parseInt(faker.commerce.price({ min: 100000, max: 5000000, dec: 0 }));
+        product.cart = [];
+        
+        product.category_id = categories[i % categories.length]._id;
+        product.product_images = [];
+        product.variant = [];
         // * For the product images
         for (let i = 0; i < randomInt(1, 5); i++) {
-            await ProductImages.create({
+            const productImages = await ProductImages.create({
                 productId: product._id,
                 image: faker.image.urlLoremFlickr({ width: 200, height: 200, category: 'food' }),
             })
+            product.product_images.push(productImages);
         }
         // * For the variants
         for (let i = 0; i < randomInt(1, 6); i++) {
-            await ProductVariations.create({
+            const productVariants = await ProductVariations.create({
                 name: faker.commerce.productMaterial(),
-                product_id: product._id,
+                product: product._id,
                 cart: []
             })
+            product.variant.push(productVariants);
         }
+        await product.save();
     }
 
     logger.info("🌱 Seeding has been completed")

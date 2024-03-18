@@ -15,27 +15,29 @@ mongoose.connect(`mongodb+srv://tataran:${process.env.MONGO_PASSWORD}@nodeadmin.
     const product = await Product.find({});
     const variants = await ProductVariations.find();
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 100; i++) {
         const order = await Order.create({
-            user_id: users[i].id,
-            name: users[i].fullName,
-            email: users[i].email,
+            user_id: users[i % users.length].id,
+            name: users[i % users.length].fullName,
+            email: users[i % users.length].email,
             completed: true
         });
-
+        order.order_items = [];
         for (let j = 0; j < randomInt(1, 5); j++) {
             const orderItem = await OrderItem.create({
                 order_id: order,
-                product_id: product[i]._id,
-                variant_id: variants[i]._id,
-                product_title: product[i].title,
-                price: product[i].price,
+                product_id: product[i % product.length]._id,
+                variant_id: variants[i % variants.length]._id,
+                product_title: product[i % product.length].title,
+                price: product[i % product.length].price,
                 quantity: randomInt(1, 5),
             });
             order.order_items.push(orderItem)
         }
-
+        
+        await User.findByIdAndUpdate(users[i % users.length].id, { $push: { orders: order._id } });
         await order.save();
+        // await Cart.findByIdAndUpdate(carts, { $push: { orders: order } });
     }
 
     logger.info("🌱 Seeding has been completed")

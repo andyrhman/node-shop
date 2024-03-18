@@ -9,6 +9,7 @@ import { Cart, CartDocument } from "../models/cart.schema";
 import { UpdateCartDto } from "../validation/dto/carts/update.dto";
 import { Product } from "../models/product.schema";
 import { ProductVariations } from "../models/product-variation.schema";
+import { User } from "../models/user.schema";
 
 export const Carts = async (req: Request, res: Response) => {
   try {
@@ -147,6 +148,7 @@ export const CreateCart = async (req: Request, res: Response) => {
       // ? https://www.phind.com/search?cache=j0o9yjdip7v2tab4byul6ug4
       await Product.findByIdAndUpdate(body.product_id, { $push: { cart: c } });
       await ProductVariations.findByIdAndUpdate(body.variant_id, { $push: { cart: c } });
+      await User.findByIdAndUpdate(user, { $push: { cart: c } });
       return res.send(c);
     }
   } catch (error) {
@@ -232,6 +234,11 @@ export const DeleteCart = async (req: Request, res: Response) => {
     );
     
     await ProductVariations.updateMany(
+      { cart: req.params.id },
+      { $pull: { cart: req.params.id } }
+    );
+
+    await User.updateMany(
       { cart: req.params.id },
       { $pull: { cart: req.params.id } }
     );

@@ -376,7 +376,7 @@ export const DeleteProductVariation = async (req: Request, res: Response) => {
 export const GetProductAvgRating = async (req: Request, res: Response) => {
   try {
     const reviewService = new ReviewService();
-    res.send(await reviewService.calculateAverageRating(req.params.id));
+    res.json(await reviewService.calculateAverageRating(req.params.id));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

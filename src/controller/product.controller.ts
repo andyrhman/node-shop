@@ -20,12 +20,16 @@ export const Products = async (req: Request, res: Response) => {
   try {
     const repository = new ProductService();
     const reviewService = new ReviewService();
-    let products = await repository.find({});
+    let products = await Product.find().sort({ createdAt: -1 })
+    .populate('variant', 'name')
+    .populate('product_images', 'name')
+    .populate('review')
+    .populate('category_id', 'name')
+    .lean(); // Retrieve plain JavaScript objects
 
     // Add average rating to each product.
     for (let product of products) {
-      (product as any).averageRating =
-        await reviewService.calculateAverageRating(product.id);
+      product.averageRating = await reviewService.calculateAverageRating(product._id.toString());
     }
 
     // Existing filter and sort code...
@@ -150,7 +154,7 @@ export const CreateProduct = async (req: Request, res: Response) => {
     }
     const product = await p.save();
 
-    await Category.findByIdAndUpdate(body.category, { product });
+    await Category.findByIdAndUpdate(body.category, { $push: { product } });
 
     res.send(product);
   } catch (error) {
@@ -228,7 +232,6 @@ export const UpdateProduct = async (req: Request, res: Response) => {
     const validationErrors = await validate(input);
 
     if (validationErrors.length > 0) {
-      // Use the utility function to format and return the validation errors
       return res.status(400).json(formatValidationErrors(validationErrors));
     }
 
@@ -238,6 +241,19 @@ export const UpdateProduct = async (req: Request, res: Response) => {
     const products = await Product.findById(req.params.id);
     if (!products) {
       return res.status(404).send({ message: "Invalid Request" });
+    }
+
+    // Check if category_id is present in the request body
+    if (body.category_id) {
+      // If category_id is present, update the categories associated with the product
+      await Category.updateMany(
+        { product: products._id },
+        { $pull: { product: products._id } }
+      );
+
+      await Category.findByIdAndUpdate(body.category_id, {
+        $addToSet: { product: products },
+      });
     }
 
     const data = await Product.findByIdAndUpdate(req.params.id, body, {
@@ -368,6 +384,12 @@ export const DeleteProduct = async (req: Request, res: Response) => {
       await productVariantService.deleteMultipleVariants(variant.product);
     }
 
+    // * Delete the related product category
+    await Category.updateMany(
+      { product: req.params.id },
+      { $pull: { product: req.params.id } }
+    );
+
     // * Delete the product
     await Product.findByIdAndDelete(req.params.id);
 
@@ -407,7 +429,7 @@ export const DeleteProductVariation = async (req: Request, res: Response) => {
 export const GetProductAvgRating = async (req: Request, res: Response) => {
   try {
     const reviewService = new ReviewService();
-    res.send(await reviewService.calculateAverageRating(req.params.id));
+    res.status(200).json(await reviewService.calculateAverageRating(req.params.id));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

@@ -49,6 +49,7 @@ mongoose.connect(`mongodb+srv://tataran:${process.env.MONGO_PASSWORD}@nodeadmin.
             })
             product.variant.push(productVariants);
         }
+        await Category.findByIdAndUpdate(categories[i % categories.length]._id, {$push: {product}})
         await product.save();
     }
 

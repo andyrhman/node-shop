@@ -21,6 +21,7 @@ export interface ProductDocument extends Document {
   cart: CartDocument[];
   order_item: OrderItemsDocument[];
   review: ReviewDocument[];
+  averageRating?: number; 
 }
 
 export const ProductSchema = new Schema({

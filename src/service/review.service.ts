@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Review, ReviewDocument } from "../models/review.schema";
 import { AbstractService } from "./abstract.service";
 
@@ -13,7 +14,7 @@ export class ReviewService extends AbstractService<ReviewDocument> {
     }
     // ? https://www.phind.com/search?cache=ttxqttkk5uvdrefvxjufr0uk
     async calculateAverageRating(productId: string): Promise<number> {
-        const reviews = await this.model.find({ product_id: productId });
+        const reviews = await this.model.find({ product_id: new mongoose.Types.ObjectId(productId) });
         if (reviews.length === 0) return 0; // If no reviews, return 0
 
         const totalStars = reviews.reduce((total, review) => total + review.star, 0);

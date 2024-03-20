@@ -2,14 +2,18 @@ import { Request, Response } from "express";
 import { OrderService } from "../service/order.service";
 import { UserService } from "../service/user.service";
 import { AddressService } from "../service/address.service";
-import { Order } from "../models/order.schema";
+import { Order, OrderDocument } from "../models/order.schema";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
 import { CreateOrderDto } from "../validation/dto/orders/create.dto";
 import { formatValidationErrors } from "../validation/utility/validation.utility";
 import { Cart, CartDocument } from "../models/cart.schema";
 import { CartService } from "../service/cart.service";
-import { OrderItem, OrderItemStatus, OrderItemsDocument } from "../models/order-items.schema";
+import {
+  OrderItem,
+  OrderItemStatus,
+  OrderItemsDocument,
+} from "../models/order-items.schema";
 import { eventEmitter } from "../index";
 import { ChangeStatusDTO } from "../validation/dto/orders/change-status.dto";
 import { OrderItemService } from "../service/order-item.service";
@@ -24,8 +28,10 @@ export const Orders = async (req: Request, res: Response) => {
   try {
     let search = req.query.search;
 
-    let orders = await Order.find()
-      .populate({ path: "order_items", populate: { path: "product_id" } });
+    let orders = await Order.find().populate({
+      path: "order_items",
+      populate: { path: "product_id" },
+    });
 
     if (typeof search === "string") {
       search = sanitizeHtml(search);
@@ -53,7 +59,32 @@ export const Orders = async (req: Request, res: Response) => {
       }
     }
 
-    res.send(orders);
+    res.send(
+      orders.map((o: OrderDocument) => {
+        return {
+          _id: o._id,
+          name: o.name,
+          email: o.email,
+          completed: o.completed,
+          user_id: o.user_id,
+          total: o.total,
+          total_orders: o.total_orders,
+          order_items: o.order_items.map((i: OrderItemsDocument) => {
+            return {
+              _id: i._id,
+              product_title: i.product_title,
+              price: i.price,
+              quantity: i.quantity,
+              variant_id: i.variant_id,
+              order_id: i.order_id,
+              status: i.status,
+            };
+          }),
+          created_at: o.created_at,
+          id: o._id,
+        };
+      })
+    );
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);
@@ -75,7 +106,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
   const userId = req["id"];
 
   const user = await User.findById(userId);
-  const address = await Address.findOne({user_id: userId});
+  const address = await Address.findOne({ user_id: userId });
   if (!address) {
     return res
       .status(400)
@@ -197,17 +228,17 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
     const orderItemService = new OrderItemService();
     const cartService = new CartService();
 
-    const order = await Order.findOne({transaction_id: req.body.source})
-    .populate('user_id')
-    .populate({path: 'order_items', populate: {path: 'product_id'}})
-    .populate({path: 'order_items', populate: {path: 'variant_id'}});
+    const order = await Order.findOne({ transaction_id: req.body.source })
+      .populate("user_id")
+      .populate({ path: "order_items", populate: { path: "product_id" } })
+      .populate({ path: "order_items", populate: { path: "variant_id" } });
 
     if (!order) {
-      return res.status(404).send({message: "Order not found"});
+      return res.status(404).send({ message: "Order not found" });
     }
 
     if (order.user_id.toString() !== user) {
-      return res.status(403).send({message: "Not Allowed!"});
+      return res.status(403).send({ message: "Not Allowed!" });
     }
 
     const carts: CartDocument[] = await cartService.find({
@@ -231,7 +262,7 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
     }
     await orderService.update(order._id, { completed: true });
 
-    await User.findByIdAndUpdate(order.user_id, { $push: {orders: order}});
+    await User.findByIdAndUpdate(order.user_id, { $push: { orders: order } });
 
     eventEmitter.emit("order.completed", order);
 
@@ -250,8 +281,10 @@ export const GetUserOrder = async (req: Request, res: Response) => {
   try {
     const id = req["id"];
     res.send(
-      await Order.find({ user_id: id })
-      .populate({path: 'order_items', populate: {path: 'product_id'}})
+      await Order.find({ user_id: id }).populate({
+        path: "order_items",
+        populate: { path: "product_id" },
+      })
     );
   } catch (error) {
     if (process.env.NODE_ENV === "development") {

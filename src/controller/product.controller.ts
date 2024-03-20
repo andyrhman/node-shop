@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ProductService } from "../service/product.service";
-import { Product } from "../models/product.schema";
+import { Product, ProductDocument } from "../models/product.schema";
 import { Category } from "../models/category.schema";
 import { ProductCreateDto } from "../validation/dto/products/product-create.dto";
 import { plainToClass } from "class-transformer";
@@ -18,11 +18,11 @@ import { ReviewService } from "../service/review.service";
 
 export const Products = async (req: Request, res: Response) => {
   try {
-    const repository = new ProductService();
     const reviewService = new ReviewService();
+    // ! Remove the cart data response
     let products = await Product.find().sort({ createdAt: -1 })
     .populate('variant', 'name')
-    .populate('product_images', 'name')
+    .populate('product_images', 'image')
     .populate('review')
     .populate('category_id', 'name')
     .lean(); // Retrieve plain JavaScript objects
@@ -90,7 +90,22 @@ export const Products = async (req: Request, res: Response) => {
       });
     }
 
-    res.send(products);
+    res.send(products.map((p: ProductDocument) => {
+      return{
+        id: p._id,
+        title: p.title,
+        slug: p.slug,
+        description: p.description,
+        image: p.image,
+        price: p.price,
+        category_id: p.category_id,
+        product_images: p.product_images,
+        variant: p.variant,
+        created_at: p.created_at,
+        updated_at: p.updated_at,
+        averageRating: p.averageRating
+      }
+    }));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

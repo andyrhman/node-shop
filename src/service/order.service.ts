@@ -58,10 +58,10 @@ export class OrderService extends AbstractService<OrderDocument> {
       }
     ]).exec();
 
-    // Format the result to match the SQL output
-    return results.map((item) => ({
-      date: item.date,
-      sum: item.sum.replace(/,/g, ""), // Remove commas as per the SQL REPLACE function
+    // Format the result to match the SQL output with Indonesian Rupiah currency format
+    return results.map((result) => ({
+      ...result,
+      sum: `${(parseInt(result.sum) / 100).toLocaleString("id-ID")}`,
     }));
   }
 }

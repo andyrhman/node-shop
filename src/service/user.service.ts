@@ -32,7 +32,7 @@ export class UserService extends AbstractService<UserDocument> {
      // Format the result to match the SQL output
      return result.map(item => ({
         date: item._id,
-        count: item.count
+        count: item.count.toString()
      }));
   }
 }

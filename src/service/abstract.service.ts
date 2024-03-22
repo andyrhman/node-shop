@@ -45,4 +45,11 @@ export abstract class AbstractService<T extends mongoose.Document<any>> {
       $or: [{ username }, { email }],
     }).exec();
   }
+
+  async total(options: any) {
+    const collections = await this.model.find(options);
+    return {
+        total: collections.length
+    };
+}
 }

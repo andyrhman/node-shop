@@ -57,7 +57,7 @@ export class CartService extends AbstractService<CartDocument> {
     const result = await Cart.aggregate([
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$created_at" } },
           sum: { $sum: "$quantity" },
         },
       },

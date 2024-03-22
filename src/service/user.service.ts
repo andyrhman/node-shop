@@ -12,7 +12,7 @@ export class UserService extends AbstractService<UserDocument> {
     const result = await User.aggregate([
         {
           $project: {
-            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$created_at" } },
             _id: 0
           }
         },

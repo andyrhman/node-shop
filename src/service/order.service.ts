@@ -11,42 +11,52 @@ export class OrderService extends AbstractService<OrderDocument> {
     const results = await Order.aggregate([
       {
         $match: {
-          completed: true,
-        },
+          completed: true
+        }
       },
       {
-        $unwind: "$order_items",
+        $lookup: {
+          from: 'order_items',
+          localField: '_id',
+          foreignField: 'order_id',
+          as: 'items'
+        }
+      },
+      {
+        $unwind: '$items'
       },
       {
         $group: {
           _id: {
-            $dateToString: {
-              format: "%Y-%m-%d",
-              date: "$createdAt",
-            },
+            date: {
+              $dateToString: {
+                format: '%Y-%m-%d',
+                date: '$created_at'
+              }
+            }
           },
           sum: {
             $sum: {
-              $multiply: ["$order_items.price", "$order_items.quantity"],
-            },
-          },
-        },
+              $multiply: ['$items.price', '$items.quantity']
+            }
+          }
+        }
       },
       {
         $project: {
           _id: 0,
-          date: "$_id",
+          date: '$_id.date',
           sum: {
-            $toString: "$sum",
-          },
-        },
+            $toString: '$sum'
+          }
+        }
       },
       {
         $sort: {
-          date: 1,
-        },
-      },
-    ]);
+          date: 1
+        }
+      }
+    ]).exec();
 
     // Format the result to match the SQL output
     return results.map((item) => ({

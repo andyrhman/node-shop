@@ -23,7 +23,7 @@ export const OrderSchema = new Schema<OrderDocument>({
     transaction_id: {type: String},
     name: {type: String},
     email: {type: String},
-    completed: {type: Boolean},
+    completed: {type: Boolean, default: false},
     user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User', default: undefined},
     order_items: {type: [mongoose.Schema.Types.ObjectId], ref: 'order_items', default: undefined},
     review: {type: [mongoose.Schema.Types.ObjectId], ref: 'Review', default: undefined}

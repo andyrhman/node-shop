@@ -200,7 +200,7 @@ export const GetProduct = async (req: Request, res: Response) => {
       .populate({
         path: "review",
         populate: {
-          path: "user",
+          path: "user_id",
         },
       });
 

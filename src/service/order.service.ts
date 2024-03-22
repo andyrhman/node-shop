@@ -6,11 +6,7 @@ export class OrderService extends AbstractService<OrderDocument> {
   constructor() {
     super(Order);
   }
-
-  async findCompletedOrdersByUser(userId: string) {
-    return this.model.find({ user_id: userId, completed: true });
-  }
-
+  
   async chart(): Promise<any[]> {
     const results = await Order.aggregate([
       {

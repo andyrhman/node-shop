@@ -133,6 +133,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
       if (!isValidObjectId(c.cart_id)) {
         return res.status(400).send({ message: "Invalid UUID format" });
       }
+    
       const cart: CartDocument[] = await Cart.find(
         { _id: c.cart_id, user_id: userId },
         null,
@@ -140,56 +141,56 @@ export const CreateOrder = async (req: Request, res: Response) => {
       )
         .populate("product_id")
         .populate("variant_id");
-
+    
       if (cart.length === 0) {
         return res.status(404).send({ message: "Cart not found." });
       }
-      if (cart[0].completed === true) {
-        return res
-          .status(400)
-          .send({ message: "Invalid order, please add new order." });
-      }
-      const orderItem = new OrderItem();
-      orderItem.order_id = order;
-      orderItem.product_title = cart[0].product_title;
-      orderItem.price = cart[0].price;
-      orderItem.quantity = cart[0].quantity;
-      orderItem.product_id = cart[0].product_id;
-      orderItem.variant_id = cart[0].variant_id;
-
-      const totalAmount = cart[0].price * cart[0].quantity;
-      if (totalAmount < 7500) {
-        return res
-          .status(400)
-          .send({ message: "The total amount must be at least Rp7,500.00" });
-      }
-
-      cart[0].order_id = order.id;
-
-      // Update the cart document using `findOneAndUpdate`
-      await Cart.findOneAndUpdate(
-        { _id: cart[0]._id },
-        { $set: { order_id: order._id } },
-        { new: true, session }
-      );
-
-      await orderItem.save({ session });
-
-      order.order_items.push(orderItem);
-
-      // * Stripe
-      line_items.push({
-        price_data: {
-          currency: "idr",
-          unit_amount: cart[0].price,
-          product_data: {
-            name: `${cart[0].product_title} - Variant ${cart[0].variant_id.name}`,
-            description: cart[0].product_id.description,
-            images: [`${cart[0].product_id.image}`],
+      // ? https://claude.ai/chat/2d5c36a0-00c7-4e50-b6b8-706ca356da8d
+      for (let cartItem of cart) {
+        if (cartItem.completed === true) {
+          return res
+            .status(400)
+            .send({ message: "Invalid order, please add new order." });
+        }
+    
+        const orderItem = new OrderItem();
+        orderItem.order_id = order;
+        orderItem.product_title = cartItem.product_title;
+        orderItem.price = cartItem.price;
+        orderItem.quantity = cartItem.quantity;
+        orderItem.product_id = cartItem.product_id;
+        orderItem.variant_id = cartItem.variant_id;
+    
+        const totalAmount = cartItem.price * cartItem.quantity;
+        if (totalAmount < 7500) {
+          return res
+            .status(400)
+            .send({ message: "The total amount must be at least Rp7,500.00" });
+        }
+    
+        cartItem.order_id = order.id;
+        await Cart.findOneAndUpdate(
+          { _id: cartItem._id },
+          { $set: { order_id: order._id } },
+          { new: true, session }
+        );
+    
+        await orderItem.save({ session });
+        order.order_items.push(orderItem);
+    
+        line_items.push({
+          price_data: {
+            currency: "idr",
+            unit_amount: cartItem.price,
+            product_data: {
+              name: `${cartItem.product_title} - Variant ${cartItem.variant_id.name}`,
+              description: cartItem.product_id.description,
+              images: [`${cartItem.product_id.image}`],
+            },
           },
-        },
-        quantity: cart[0].quantity,
-      });
+          quantity: cartItem.quantity,
+        });
+      }
     }
 
     // * Stripe
@@ -237,7 +238,8 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
       return res.status(404).send({ message: "Order not found" });
     }
 
-    if (order.user_id.toString() !== user) {
+    if ((order as any)._doc.user_id._id.toString() !== user) {
+      // logger.info((order as any)._doc.user_id._id.toString());
       return res.status(403).send({ message: "Not Allowed!" });
     }
 

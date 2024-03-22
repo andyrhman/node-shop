@@ -61,7 +61,7 @@ import {
   Orders,
 } from "./controller/order.controller";
 // import { CartsStat, OrdersStat, Stats, UsersStat } from "./controller/statistic.controller";
-// import { CreateReview, GetReviewAdmin, GetReviewsUser, Reviews } from "./controller/review.controller";
+import { CreateReview, GetReviewAdmin, GetReviewsUser, Reviews } from "./controller/review.controller";
 // import { Forgot, Reset } from "./controller/reset.controller";
 
 export const routes = (router: Router) => {
@@ -148,11 +148,11 @@ export const routes = (router: Router) => {
   router.get("/api/admin/order-items/:id", AuthMiddleware, GetOrderItem);
   router.put("/api/admin/orders/:id", AuthMiddleware, ChangeOrderStatus);
 
-//   // * Review
-//   router.get('/api/admin/reviews', AuthMiddleware, Reviews);
-//   router.get('/api/admin/reviews/:id', AuthMiddleware, GetReviewAdmin);
-//   router.get('/api/reviews/:id', GetReviewsUser);
-//   router.post('/api/review', userIdMidlleware, CreateReview);
+  // * Review
+  router.get('/api/admin/reviews', AuthMiddleware, Reviews);
+  router.get('/api/admin/reviews/:id', AuthMiddleware, GetReviewAdmin);
+  router.get('/api/reviews/:id', GetReviewsUser);
+  router.post('/api/review', userIdMidlleware, CreateReview);
 
 //   // * Statistic
 //   router.get('/api/admin/stats', AuthMiddleware, Stats);

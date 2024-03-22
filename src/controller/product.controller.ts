@@ -19,17 +19,33 @@ import { ReviewService } from "../service/review.service";
 export const Products = async (req: Request, res: Response) => {
   try {
     const reviewService = new ReviewService();
-    // ! Remove the cart data response
-    let products = await Product.find().sort({ createdAt: -1 })
-    .populate('variant', 'name')
-    .populate('product_images', 'image')
-    .populate('review')
-    .populate('category_id', 'name')
-    .lean(); // Retrieve plain JavaScript objects
+
+    let products = await Product.find({}, { cart: 0 })
+      .sort({ createdAt: -1 })
+      .populate("variant", "name")
+      .populate("product_images", "image")
+      .populate({
+        path: "review",
+        select: {
+          _id: 0,
+          comment: 0,
+          image: 0,
+          user_id: 0,
+          product_id: 0,
+          variant_id: 0,
+          order_id: 0,
+          created_at: 0,
+          updatedAt: 0,
+        },
+      })
+      .populate("category_id", "name")
+      .lean(); // Retrieve plain JavaScript objects
 
     // Add average rating to each product.
     for (let product of products) {
-      product.averageRating = await reviewService.calculateAverageRating(product._id.toString());
+      product.averageRating = await reviewService.calculateAverageRating(
+        product._id.toString()
+      );
     }
 
     // Existing filter and sort code...
@@ -90,22 +106,7 @@ export const Products = async (req: Request, res: Response) => {
       });
     }
 
-    res.send(products.map((p: ProductDocument) => {
-      return{
-        id: p._id,
-        title: p.title,
-        slug: p.slug,
-        description: p.description,
-        image: p.image,
-        price: p.price,
-        category_id: p.category_id,
-        product_images: p.product_images,
-        variant: p.variant,
-        created_at: p.created_at,
-        updated_at: p.updated_at,
-        averageRating: p.averageRating
-      }
-    }));
+    res.send(products);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);
@@ -193,15 +194,45 @@ export const Variants = async (req: Request, res: Response) => {
 
 export const GetProduct = async (req: Request, res: Response) => {
   try {
-    const product = await Product.findOne({ slug: req.params.slug })
+    const product = await Product.findOne(
+      { slug: req.params.slug },
+      { cart: 0 }
+    )
       .populate("product_images")
-      .populate("variant")
+      .populate({
+        path: "variant",
+        select: {
+          cart: 0,
+        },
+      })
       .populate("category_id", ["_id", "name"])
       .populate({
         path: "review",
-        populate: {
-          path: "user_id",
-        },
+        populate: [
+          {
+            path: "user_id",
+            select: {
+              _id: 0,
+              is_user: 0,
+              is_verified: 0,
+              email: 0,
+              password: 0,
+              cart: 0,
+              orders: 0,
+              verify: 0,
+              review: 0,
+              created_at: 0,
+              updated_at: 0,
+              id: 0,
+            },
+          },
+          {
+            path: "variant_id",
+            select: {
+              cart: 0,
+            },
+          },
+        ],
       });
 
     // Add average rating and review count to the product
@@ -444,7 +475,9 @@ export const DeleteProductVariation = async (req: Request, res: Response) => {
 export const GetProductAvgRating = async (req: Request, res: Response) => {
   try {
     const reviewService = new ReviewService();
-    res.status(200).json(await reviewService.calculateAverageRating(req.params.id));
+    res
+      .status(200)
+      .json(await reviewService.calculateAverageRating(req.params.id));
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import { OrderService } from "../service/order.service";
-import { UserService } from "../service/user.service";
-import { AddressService } from "../service/address.service";
 import { Order, OrderDocument } from "../models/order.schema";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
@@ -30,7 +28,17 @@ export const Orders = async (req: Request, res: Response) => {
 
     let orders = await Order.find().populate({
       path: "order_items",
-      populate: { path: "product_id" },
+      populate: {
+        path: "product_id",
+        select: {
+          cart: 0,
+          product_images: 0,
+          variant: 0,
+          review: 0,
+          created_at: 0,
+          updated_at: 0
+        },
+      },
     });
 
     if (typeof search === "string") {
@@ -59,32 +67,7 @@ export const Orders = async (req: Request, res: Response) => {
       }
     }
 
-    res.send(
-      orders.map((o: OrderDocument) => {
-        return {
-          _id: o._id,
-          name: o.name,
-          email: o.email,
-          completed: o.completed,
-          user_id: o.user_id,
-          total: o.total,
-          total_orders: o.total_orders,
-          order_items: o.order_items.map((i: OrderItemsDocument) => {
-            return {
-              _id: i._id,
-              product_title: i.product_title,
-              price: i.price,
-              quantity: i.quantity,
-              variant_id: i.variant_id,
-              order_id: i.order_id,
-              status: i.status,
-            };
-          }),
-          created_at: o.created_at,
-          id: o._id,
-        };
-      })
-    );
+    res.send(orders);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);
@@ -133,7 +116,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
       if (!isValidObjectId(c.cart_id)) {
         return res.status(400).send({ message: "Invalid UUID format" });
       }
-    
+
       const cart: CartDocument[] = await Cart.find(
         { _id: c.cart_id, user_id: userId },
         null,
@@ -141,7 +124,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
       )
         .populate("product_id")
         .populate("variant_id");
-    
+
       if (cart.length === 0) {
         return res.status(404).send({ message: "Cart not found." });
       }
@@ -152,7 +135,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
             .status(400)
             .send({ message: "Invalid order, please add new order." });
         }
-    
+
         const orderItem = new OrderItem();
         orderItem.order_id = order;
         orderItem.product_title = cartItem.product_title;
@@ -160,24 +143,24 @@ export const CreateOrder = async (req: Request, res: Response) => {
         orderItem.quantity = cartItem.quantity;
         orderItem.product_id = cartItem.product_id;
         orderItem.variant_id = cartItem.variant_id;
-    
+
         const totalAmount = cartItem.price * cartItem.quantity;
         if (totalAmount < 7500) {
           return res
             .status(400)
             .send({ message: "The total amount must be at least Rp7,500.00" });
         }
-    
+
         cartItem.order_id = order.id;
         await Cart.findOneAndUpdate(
           { _id: cartItem._id },
           { $set: { order_id: order._id } },
           { new: true, session }
         );
-    
+
         await orderItem.save({ session });
         order.order_items.push(orderItem);
-    
+
         line_items.push({
           price_data: {
             currency: "idr",
@@ -285,7 +268,17 @@ export const GetUserOrder = async (req: Request, res: Response) => {
     res.send(
       await Order.find({ user_id: id }).populate({
         path: "order_items",
-        populate: { path: "product_id" },
+        populate: {
+          path: "product_id",
+          select: {
+            cart: 0,
+            product_images: 0,
+            variant: 0,
+            review: 0,
+            created_at: 0,
+            updated_at: 0
+          },
+        },
       })
     );
   } catch (error) {

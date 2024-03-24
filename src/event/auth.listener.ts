@@ -1,7 +1,7 @@
 import transporter from "../config/transporter.config";
 import { eventEmitter } from "../index";
 import { Token } from "../models/token.schema";
-import { UserDocument } from "../models/user.schema";
+import { User, UserDocument } from "../models/user.schema";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as handlebars from "handlebars";
@@ -12,12 +12,14 @@ eventEmitter.on("user.created", async (user: UserDocument) => {
   const tokenExpiresAt = Date.now() + 1 * 60 * 1000;
 
   // Save the reset token and expiration time
-  await Token.create({
+  const verify = await Token.create({
     token,
     email: user.email,
     user_id: user._id,
     expiresAt: tokenExpiresAt,
   });
+
+  await User.findByIdAndUpdate(user, { $push: { verify } });
 
   const url = `${process.env.ORIGIN_2}/verify/${token}`;
 

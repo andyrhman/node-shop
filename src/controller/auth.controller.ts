@@ -34,7 +34,7 @@ export const Register = async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      return res.status(400).send("Username or email already exists");
+      return res.status(400).send({message: "Username or email already exists"});
     }
 
     const hashPassword = await argon2.hash(body.password);
@@ -297,7 +297,7 @@ export const ResendVerify = async (req: Request, res: Response) => {
 
     const tokenExpiresAt = Date.now() + 1 * 60 * 1000;
 
-    await Token.create({
+    const verify = await Token.create({
       token,
       email: user.email,
       user_id: user.id,
@@ -305,6 +305,8 @@ export const ResendVerify = async (req: Request, res: Response) => {
     });
 
     const url = `${process.env.ORIGIN_2}/verify/${token}`;
+
+    await User.findByIdAndUpdate(user, { $push: { verify } });
 
     const name = user.fullName;
 

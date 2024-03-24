@@ -63,6 +63,7 @@ import {
 import { CartsStat, OrdersStat, Stats, UsersStat } from "./controller/statistic.controller";
 import { CreateReview, GetReviewAdmin, GetReviewsUser, Reviews } from "./controller/review.controller";
 import { Forgot, Reset } from "./controller/reset.controller";
+import { TotalUsers, Users } from "./controller/user.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -81,6 +82,10 @@ export const routes = (router: Router) => {
   router.put("/api/user/password", AuthMiddleware, UpdatePassword);
   router.post("/api/verify", ResendVerify);
   router.put("/api/verify/:token", VerifyAccount);
+
+  // * User
+  router.get("/api/admin/users", AuthMiddleware, Users);
+  router.get("/api/admin/total-users", AuthMiddleware, TotalUsers);
 
   // * Address
   router.get("/api/admin/address", AuthMiddleware, Addresses);

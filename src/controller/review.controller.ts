@@ -5,12 +5,10 @@ import { plainToClass } from "class-transformer";
 import { CreateReviewDTO } from "../validation/dto/reviews/create.dto";
 import { validate } from "class-validator";
 import { formatValidationErrors } from "../validation/utility/validation.utility";
-import { ProductService } from "../service/product.service";
-import { OrderService } from "../service/order.service";
-import { OrderItemService } from "../service/order-item.service";
 import { Review, ReviewDocument } from "../models/review.schema";
 import { Order } from "../models/order.schema";
 import { OrderItem } from "../models/order-items.schema";
+import { User } from "../models/user.schema";
 
 export const Reviews = async (req: Request, res: Response) => {
   try {
@@ -169,8 +167,6 @@ export const CreateReview = async (req: Request, res: Response) => {
     });
 
     if (!completedOrders) {
-      logger.info(completedOrders);
-      logger.info(productInOrderItems);
       return res.status(400).send({
         message: "You can't review a product that you haven't purchased 1 .",
       });
@@ -186,6 +182,8 @@ export const CreateReview = async (req: Request, res: Response) => {
       ...body,
       user_id: user,
     });
+
+    await User.findByIdAndUpdate(user, { $push: { review } });
 
     res.send(review);
   } catch (error) {

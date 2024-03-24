@@ -5,7 +5,7 @@ import logger from "../config/logger.config";
 
 export const Users = async (req: Request, res: Response) => {
     try {
-        let user = await User.find();
+        let user = await User.find({}, {cart: 0, orders: 0, verify: 0, review: 0, password: 0});
 
         if (req.query.search) {
             const search = req.query.search.toString().toLowerCase();

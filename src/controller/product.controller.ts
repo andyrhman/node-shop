@@ -172,16 +172,21 @@ export const GetProduct = async (req: Request, res: Response) => {
         "product_images",
         "variant",
         "category",
-        // "review",
-        // "review.user",
+        "review",
+        "review.user",
       ],
     });
 
-    // Add average rating and review count to the product
-    // const ratingAndReviewCount =
-    //   await this.reviewService.getRatingAndReviewCount(product.id);
-    // (product as any).averageRating = ratingAndReviewCount.averageRating;
-    // (product as any).reviewCount = ratingAndReviewCount.reviewCount;
+    if (!product) {
+      return res.status(404).send({ message: "Product Not Found" });
+    }
+
+    // ? Add average rating and review count to the product
+    const reviewService = new ReviewService();
+    const ratingAndReviewCount =
+      await reviewService.getRatingAndReviewCount(product.id);
+    (product as any).averageRating = ratingAndReviewCount.averageRating;
+    (product as any).reviewCount = ratingAndReviewCount.reviewCount;
 
     res.send(product);
   } catch (error) {

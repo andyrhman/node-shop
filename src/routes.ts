@@ -62,7 +62,7 @@ import {
 } from "./controller/order.controller";
 import { CartsStat, OrdersStat, Stats, UsersStat } from "./controller/statistic.controller";
 import { CreateReview, GetReviewAdmin, GetReviewsUser, Reviews } from "./controller/review.controller";
-// import { Forgot, Reset } from "./controller/reset.controller";
+import { Forgot, Reset } from "./controller/reset.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -160,7 +160,7 @@ export const routes = (router: Router) => {
   router.get('/api/admin/cart-chart', AuthMiddleware, CartsStat);
   router.get('/api/admin/user-chart', AuthMiddleware, UsersStat);
 
-//   // * Reset Password
-//   router.post('/api/forgot', Forgot);
-//   router.post('/api/reset', Reset);
+  // * Reset Password
+  router.post('/api/forgot', Forgot);
+  router.post('/api/reset', Reset);
 };

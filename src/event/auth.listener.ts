@@ -9,7 +9,8 @@ import * as handlebars from "handlebars";
 eventEmitter.on("user.created", async (user: UserDocument) => {
   const token = crypto.randomBytes(16).toString("hex");
 
-  const tokenExpiresAt = Date.now() + 1 * 60 * 1000;
+  const tokenExpiresAt = Date.now() + 40 * 60 * 1000; // ? 40 Minutes
+  // const tokenExpiresAt = Date.now() + 1 * 60 * 1000; // ? 1 Minute
 
   // Save the reset token and expiration time
   const verify = await Token.create({

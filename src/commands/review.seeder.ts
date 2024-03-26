@@ -28,12 +28,12 @@ mongoose.connect(`mongodb+srv://tataran:${process.env.MONGO_PASSWORD}@nodeadmin.
         const orderItems = await OrderItem.find({order_id: orders});
 
         review.user_id = orders[i % orders.length].user_id;
-        review.product_id = orderItems[i % products.length].product_id;
+        review.product_id = orderItems[i % orderItems.length].product_id;
         review.variant_id = orderItems[i % variants.length].variant_id;
         review.order_id = orderItems[i % orders.length].order_id;
 
+        await Product.findByIdAndUpdate(orderItems[i % orderItems.length].product_id, { $push: { review: review._id } })
         await User.findByIdAndUpdate(users[i % users.length].id, { $push: { review: review._id } });
-        await Product.findByIdAndUpdate(products[i % products.length].id, { $push: { review: review._id } })
         await review.save();
     }
 

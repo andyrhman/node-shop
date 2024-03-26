@@ -22,6 +22,7 @@ export interface ProductDocument extends Document {
   order_item: OrderItemsDocument[];
   review: ReviewDocument[];
   averageRating?: number; 
+  reviewCount?: number;
 }
 
 export const ProductSchema = new Schema({

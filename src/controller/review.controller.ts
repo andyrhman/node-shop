@@ -9,6 +9,7 @@ import { Review, ReviewDocument } from "../models/review.schema";
 import { Order } from "../models/order.schema";
 import { OrderItem } from "../models/order-items.schema";
 import { User } from "../models/user.schema";
+import { Product } from "../models/product.schema";
 
 export const Reviews = async (req: Request, res: Response) => {
   try {
@@ -183,6 +184,7 @@ export const CreateReview = async (req: Request, res: Response) => {
       user_id: user,
     });
 
+    await Product.findByIdAndUpdate(body.product_id, { $push: { review } });
     await User.findByIdAndUpdate(user, { $push: { review } });
 
     res.send(review);

@@ -36,6 +36,6 @@ export const AuthMiddleware = async (req: Request, res: Response, next: Function
         }
     } catch (error) {
         logger.error(error);
-        return res.status(400).send({ message: "Invalid Request" })
+        return res.status(401).send({ message: "Unauthenticated" })
     }
 }

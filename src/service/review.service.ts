@@ -21,7 +21,7 @@ export class ReviewService extends AbstractService<ReviewDocument> {
         return totalStars / reviews.length;
     }
     async getRatingAndReviewCount(productId: string): Promise<{ averageRating: number, reviewCount: number }> {
-        const reviews = await this.model.find({ product_id: productId });
+        const reviews = await this.model.find({ product_id: new mongoose.Types.ObjectId(productId) });
         let averageRating = 0;
         let reviewCount = reviews.length;
 

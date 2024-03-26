@@ -235,15 +235,22 @@ export const GetProduct = async (req: Request, res: Response) => {
         ],
       });
 
+    if (!product) {
+      return res.status(404).send({ message: "Not Found" });
+    }
     // Add average rating and review count to the product
     const reviewService = new ReviewService();
-    const ratingAndReviewCount = await reviewService.getRatingAndReviewCount(
-      product._id
-    );
-    (product as any).averageRating = ratingAndReviewCount.averageRating;
-    (product as any).reviewCount = ratingAndReviewCount.reviewCount;
+    const { averageRating, reviewCount } =
+      await reviewService.getRatingAndReviewCount(product._id);
 
-    res.send(product);
+    // Merge the _doc object with the averageRating object
+    const mergeDatas = {
+      ...(product as any)._doc,
+      averageRating,
+      reviewCount,
+    };
+
+    res.send(mergeDatas);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       logger.error(error);

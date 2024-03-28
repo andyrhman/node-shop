@@ -86,7 +86,9 @@ export const CreateReview = async (req: Request, res: Response) => {
 
     const reviewExist = await reviewService.findOne({
       user_id: user,
+      order_id: body.order_id,
       product_id: body.product_id,
+      variant_id: body.variant_id,
     });
 
     const product = await productService.findOne({ id: body.product_id });
@@ -105,20 +107,31 @@ export const CreateReview = async (req: Request, res: Response) => {
       return res.status(404).send({ message: "Product does not exist." });
     }
 
-    const completedOrders = await orderService.findCompletedOrdersByUser(user);
+    // * Create a form with the order id hidden in the from of create review on the frontend
+    const completedOrders = await orderService.findOne({
+      id: body.order_id,
+      user_id: user,
+      completed: true,
+    });
 
-    const productInOrderItems = await orderItemService.isProductInOrderItems(
-      body.product_id,
-      completedOrders
-    );
+    const productInOrderItems = await orderItemService.findOne({
+      id: body.order_item,
+      order_id: body.order_id,
+      product_id: body.product_id,
+      variant_id: body.variant_id,
+    });
+
+    if (!completedOrders) {
+      return res.status(400).send({
+        message: "You can't review a product that you haven't purchased.",
+      });
+    }
 
     if (!productInOrderItems) {
-      return res
-        .status(400)
-        .send({
-          message: "You can't review a product that you haven't purchased.",
-        });
-    }
+      return res.status(400).send({
+        message: "You can't review a product that you haven't purchased.",
+      });
+    }    
 
     const review = await reviewService.create({
       ...body,

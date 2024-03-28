@@ -2,6 +2,7 @@ import { Product } from "./product.entity";
 import { Order } from "./order.entity";
 import { User } from "./user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { ProductVariation } from "./product-variation.entity";
 
 @Entity('reviews')
 export class Review{
@@ -23,6 +24,9 @@ export class Review{
     @Column({name: "product_id"})
     product_id: string;
 
+    @Column({name: "variant_id", nullable: true})
+    variant_id: string;
+
     @CreateDateColumn()
     created_at: string;
 
@@ -40,4 +44,8 @@ export class Review{
     @ManyToOne(() => Order, (order) => order.review)
     @JoinColumn({name: "order_id"})
     order: Order;
+
+    @ManyToOne(() => ProductVariation, (variants) => variants.reviews)
+    @JoinColumn({name: "variant_id"})
+    variants: ProductVariation;
 }

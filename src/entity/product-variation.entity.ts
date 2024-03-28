@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { Product } from "./product.entity";
 import { Cart } from "./cart.entity";
 import { OrderItem } from "./order-items.entity";
+import { Review } from "./review.entity";
 
 @Entity('product_variations')
 export class ProductVariation {
@@ -23,4 +24,7 @@ export class ProductVariation {
 
     @OneToMany(() => OrderItem, (order_item) => order_item.variant)
     order_item: OrderItem[];
+
+    @OneToMany(() => Review, (reviews) => reviews.variants)
+    reviews: Review[];
 }

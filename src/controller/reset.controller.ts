@@ -41,7 +41,7 @@ export const Forgot = async (req: Request, res: Response) => {
 
     // ? https://www.phind.com/agent?cache=clpqjretb0003ia07g9pc4v5a
     const source = fs
-      .readFileSync("src/templates/auth.hbs", "utf-8")
+      .readFileSync("src/templates/email.hbs", "utf-8")
       .toString();
 
     const template = handlebars.compile(source);

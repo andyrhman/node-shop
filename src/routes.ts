@@ -60,9 +60,20 @@ import {
   GetUserOrder,
   Orders,
 } from "./controller/order.controller";
-import { CartsStat, OrdersStat, Stats, UsersStat } from "./controller/statistic.controller";
-import { CreateReview, GetReviewAdmin, GetReviewsUser, Reviews } from "./controller/review.controller";
+import {
+  CartsStat,
+  OrdersStat,
+  Stats,
+  UsersStat,
+} from "./controller/statistic.controller";
+import {
+  CreateReview,
+  GetReviewAdmin,
+  GetReviewsUser,
+  Reviews,
+} from "./controller/review.controller";
 import { Forgot, Reset } from "./controller/reset.controller";
+import { TotalUsers, Users } from "./controller/user.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -81,6 +92,10 @@ export const routes = (router: Router) => {
   router.put("/api/user/password", AuthMiddleware, UpdatePassword);
   router.post("/api/verify", ResendVerify);
   router.put("/api/verify/:token", VerifyAccount);
+
+  // * User
+  router.get("/api/admin/users", AuthMiddleware, Users);
+  router.get("/api/admin/total-users", AuthMiddleware, TotalUsers);
 
   // * Address
   router.get("/api/admin/address", AuthMiddleware, Address);
@@ -149,18 +164,18 @@ export const routes = (router: Router) => {
   router.put("/api/admin/orders/:id", AuthMiddleware, ChangeOrderStatus);
 
   // * Review
-  router.get('/api/admin/reviews', AuthMiddleware, Reviews);
-  router.get('/api/admin/reviews/:id', AuthMiddleware, GetReviewAdmin);
-  router.get('/api/reviews/:id', GetReviewsUser);
-  router.post('/api/review', userIdMidlleware, CreateReview);
+  router.get("/api/admin/reviews", AuthMiddleware, Reviews);
+  router.get("/api/admin/reviews/:id", AuthMiddleware, GetReviewAdmin);
+  router.get("/api/reviews/:id", GetReviewsUser);
+  router.post("/api/review", userIdMidlleware, CreateReview);
 
   // * Statistic
-  router.get('/api/admin/stats', AuthMiddleware, Stats);
-  router.get('/api/admin/order-chart', AuthMiddleware, OrdersStat);
-  router.get('/api/admin/cart-chart', AuthMiddleware, CartsStat);
-  router.get('/api/admin/user-chart', AuthMiddleware, UsersStat);
+  router.get("/api/admin/stats", AuthMiddleware, Stats);
+  router.get("/api/admin/order-chart", AuthMiddleware, OrdersStat);
+  router.get("/api/admin/cart-chart", AuthMiddleware, CartsStat);
+  router.get("/api/admin/user-chart", AuthMiddleware, UsersStat);
 
   // * Reset Password
-  router.post('/api/forgot', Forgot);
-  router.post('/api/reset', Reset);
+  router.post("/api/forgot", Forgot);
+  router.post("/api/reset", Reset);
 };

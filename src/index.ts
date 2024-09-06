@@ -1,18 +1,23 @@
-require("dotenv").config();
-
-import logger from "./config/logger.config";
+import dotenv from 'dotenv';
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import myDataSource from "./config/db.config";
-import EventEmitter from 'events';
+import cloudinary from "cloudinary";
 import { routes } from "./routes";
 import { ValidationMiddleware } from "./middleware/validation.middleware";
+import { AppError } from "./middleware/apperror.middleware";
+import { globalErrorHandler } from "./middleware/error.middleware";
 
-export const eventEmitter = new EventEmitter();
+dotenv.config();
 
-import "./event/auth.listener"
-import "./event/order.listener"
+import "./event/auth.listener";
+// import "./event/order.listener";
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const app = express();
 
@@ -26,16 +31,27 @@ app.use(
   })
 );
 
-myDataSource
-.initialize()
-.then(async () => {
-  routes(app);
-  
-  logger.info("🗃️ Database has been initialized!");
-  app.listen(8000, () => {
-    logger.info("👍 Server listening on port 8000");
+routes(app);
+
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use(globalErrorHandler);
+
+app.listen(process.env.PORT, () => {
+  console.log(`Server listening on port ${process.env.PORT}`);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION! Continuing...');
+  console.error(err);
+});
+
+process.on('unhandledRejection', (err: any) => {
+  console.error('UNHANDLED REJECTION! Continuing...');
+  console.error(err);
+  app.use((req, res, next) => {
+    next(err);
   });
-})
-  .catch((err) => {
-    logger.error(err);
-  });
+});

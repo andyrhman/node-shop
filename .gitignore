@@ -5,6 +5,7 @@ uploads/*
 db/migrations/*
 !db/migrations/Readme.md
 !uploads/.gitkeep 
+dist/
 
 # Logs
 logs

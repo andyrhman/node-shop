@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String   @id @default(uuid())
+  fullName String
+  username String   @unique
+  email String   @unique
+  password String
+  is_user Boolean @default(true)
+  is_verified Boolean @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  address Address?
+  orders Order[]
+  cart Cart[]
+  verify Token[]
+  review Review[]
+
+  @@map("users")
+}
+
+model Address {
+  id String @id @default(uuid())
+  street String 
+  city String
+  province String
+  zip String
+  country String
+  user_id String @unique
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  @@map("address")
+}
+
+model Category {
+  id String @id @default(uuid())
+  name String
+  product Product[]
+  @@map("categories")
+}
+
+model Product {
+  id String @id @default(uuid())
+  title String
+  slug String
+  description String
+  image String
+  price String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  category_id String
+  category Category @relation(fields: [category_id], references: [id])
+  product_images ProductImages[]
+  variant ProductVariation[]
+  cart Cart[]
+  order_item OrderItem[]
+  review Review[]
+
+  @@map("products")
+}
+
+model ProductImages {
+  id String @id @default(uuid())
+  image String
+  product_id String
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("product_images")
+}
+
+model ProductVariation {
+  id String @id @default(uuid())
+  name String
+  product_id String
+  product Product @relation(fields: [product_id], references: [id])
+  cart Cart[]
+  order_item OrderItem[]
+  @@map("product_variations")
+}
+
+model Cart {
+  id String @id @default(uuid())
+  product_title String
+  quantuty Int
+  price Float
+  completed Boolean @default(false)
+  created_at DateTime @default(now())
+  variant_id String
+  variant ProductVariation @relation(fields: [variant_id], references: [id])
+  product_id String
+  product Product @relation(fields: [product_id], references: [id])
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  order_id String
+  order Order @relation(fields: [order_id], references: [id])
+  @@map("carts")
+}
+
+model Order {
+  id String @id @default(uuid())
+  transaction_id String
+  name String
+  email String
+  created_at DateTime @default(now())
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  order_items OrderItem[]
+  cart Cart[]
+  review Review[]
+  @@map("orders")
+}
+
+enum OrderItemStatus {
+  SedangDikemas
+  Dikirim
+  Selesai
+}
+
+model OrderItem {
+  id String @id @default(uuid())
+  product_title String
+  price Float
+  quantity Int
+  status OrderItemStatus @default(SedangDikemas)
+  order_id String
+  order Order @relation(fields: [order_id], references: [id])
+  product_id String
+  product Product @relation(fields: [product_id], references: [id])
+  variant_id String
+  variant ProductVariation @relation(fields: [variant_id], references: [id])
+  @@map("order_items")
+}
+
+model Review {
+  id String @id @default(uuid())
+  star Int
+  comment String
+  image String
+  created_at DateTime @default(now())
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  product_id String
+  product Product @relation(fields: [product_id], references: [id])
+  order_id String
+  order Order @relation(fields: [order_id], references: [id])
+  @@map("reviews")
+}
+
+model Token {
+  id String @id @default(uuid())
+  email String
+  token String
+  expiresAt BigInt
+  used Boolean @default(false)
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  @@map("user_token")
+}
+
+model Reset {
+  id String @id @default(uuid())
+  email String
+  token String @unique
+  expiresAt BigInt
+  used Boolean @default(false)
+  @@map("reset")
+}

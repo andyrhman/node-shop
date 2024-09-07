@@ -2,6 +2,7 @@
 import express, { Router } from "express";
 import { AuthenticatedUser, FacebookAuth, googleAuth, Login, Logout, Register, ResendVerify, UpdateInfo, UpdatePassword, VerifyAccount } from "./controller/auth.controller";
 import { AuthMiddleware } from "./middleware/auth.middleware";
+import { Address, CreateAddress, DeleteAddress, GetAddress, UpdateAddress } from "./controller/address.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -21,12 +22,12 @@ export const routes = (router: Router) => {
   router.post("/api/verify", ResendVerify);
   router.put("/api/verify/:token", VerifyAccount);
 
-  // // * Address
-  // router.get("/api/admin/address", AuthMiddleware, Address);
-  // router.post("/api/address", userIdMidlleware, CreateAddress);
-  // router.get("/api/address", userIdMidlleware, GetAddress);
-  // router.put("/api/address", userIdMidlleware, UpdateAddress);
-  // router.delete("/api/address", userIdMidlleware, DeleteAddress);
+  // * Address
+  router.get("/api/admin/address", AuthMiddleware, Address);
+  router.post("/api/address", AuthMiddleware, CreateAddress);
+  router.get("/api/address", AuthMiddleware, GetAddress);
+  router.put("/api/address", AuthMiddleware, UpdateAddress);
+  router.delete("/api/address", AuthMiddleware, DeleteAddress);
 
   // // * Category
   // router.get("/api/categories", Categories);

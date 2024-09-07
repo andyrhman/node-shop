@@ -1,9 +1,14 @@
-// import myDataSource from "../config/typeorm.config";
-// import { Address } from "../entity/address.entity";
-// import { AbstractService } from "./abstract.service";
+import { PrismaClient, Address, Prisma } from '@prisma/client';
+import { AbstractService } from './abstract.service';
 
-// export class AddressService extends AbstractService<Address> {
-//   constructor() {
-//     super(myDataSource.getRepository(Address));
-//   }
-// }
+export class AddressService extends AbstractService<
+    Address,
+    Prisma.AddressWhereInput,
+    Prisma.AddressCreateInput,
+    Prisma.AddressUpdateInput,
+    Prisma.AddressInclude
+> {
+    constructor(prisma: PrismaClient) {
+        super(prisma, prisma.address);
+    }
+}

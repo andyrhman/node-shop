@@ -26,10 +26,17 @@ export const Register = async (req: Request, res: Response) => {
     return res.status(400).json(formatValidationErrors(validationErrors));
   }
 
-  const existingUser = await myPrisma.user.findUnique({ where: { username: body.username, email: body.email } });
+  const existingUser = await myPrisma.user.findFirst({
+    where: {
+      OR: [
+        { email: body?.email },
+        { username: body?.username }
+      ]
+    }
+  });
 
   if (existingUser) {
-    return res.status(400).send("Username or email already exists");
+    return res.status(400).send({ message: "Username or email already exists" });
   }
 
   const hashPassword = await argon2.hash(body.password);

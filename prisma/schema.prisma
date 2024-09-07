@@ -23,7 +23,7 @@ model User {
   is_verified Boolean @default(false)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  address Address?
+  address Address[]
   orders Order[]
   cart Cart[]
   verify Token[]
@@ -38,8 +38,9 @@ model Address {
   city String
   province String
   zip String
+  phone String
   country String
-  user_id String @unique
+  user_id String
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   @@map("address")
 }
@@ -176,4 +177,9 @@ model Reset {
   expiresAt BigInt
   used Boolean @default(false)
   @@map("reset")
+}
+
+model TestMyModel {
+  id String @id @default(uuid())
+  name String
 }

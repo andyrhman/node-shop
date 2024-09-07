@@ -9,7 +9,18 @@ import myPrisma from "../config/db.config";
 
 export const Address = async (req: Request, res: Response) => {
     const addressService = new AddressService(myPrisma);
-    res.send(await addressService.find({}, { user: true }));
+    const addresses = await addressService.find({}, { user: true });
+
+    const sanitizedAddresses = addresses.map(address => {
+        const user = (address as any).user;
+        if (user) {
+            const { password, ...userWithoutPassword } = user;
+            return { ...address, user: userWithoutPassword };
+        }
+        return address;
+    });
+
+    res.send(sanitizedAddresses);
 };
 
 export const CreateAddress = async (req: Request, res: Response) => {

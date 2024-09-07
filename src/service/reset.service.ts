@@ -1,18 +1,24 @@
-// import myDataSource from "../config/typeorm.config";
-// import { Reset } from "../entity/reset.entity";
-// import { AbstractService } from "./abstract.service";
+import { PrismaClient, Reset, Prisma } from '@prisma/client';
+import { AbstractService } from './abstract.service';
 
-// export class ResetService extends AbstractService<Reset> {
-//   constructor() {
-//     super(myDataSource.getRepository(Reset));
-//   }
-//   async findByTokenExpiresAt(token: string): Promise<Reset | null> {
-//     const reset = await this.repository.findOne({ where: { token } });
+export class ResetService extends AbstractService<
+    Reset,
+    Prisma.ResetWhereInput,
+    Prisma.ResetCreateInput,
+    Prisma.ResetUpdateInput,
+    undefined
+> {
+    constructor(prisma: PrismaClient) {
+        super(prisma, prisma.reset);
+    }
 
-//     if (!reset || reset.expiresAt < Date.now()) {
-//       return null; // Token is invalid or expired
-//     }
+    async findByTokenExpiresAt(token: string): Promise<Reset | null> {
+        const reset = await this.findOne({ token });
 
-//     return reset;
-//   }
-// }
+        if (!reset || reset.expiresAt < Date.now()) {
+            return null; // Token is invalid or expired
+        }
+
+        return reset;
+    }
+}

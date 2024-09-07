@@ -3,6 +3,7 @@ import express, { Router } from "express";
 import { AuthenticatedUser, FacebookAuth, googleAuth, Login, Logout, Register, ResendVerify, UpdateInfo, UpdatePassword, VerifyAccount } from "./controller/auth.controller";
 import { AuthMiddleware } from "./middleware/auth.middleware";
 import { Address, CreateAddress, DeleteAddress, GetAddress, UpdateAddress } from "./controller/address.controller";
+import { Forgot, Reset } from "./controller/reset.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -100,7 +101,7 @@ export const routes = (router: Router) => {
   // router.get('/api/admin/cart-chart', AuthMiddleware, CartsStat);
   // router.get('/api/admin/user-chart', AuthMiddleware, UsersStat);
 
-  // // * Reset Password
-  // router.post('/api/forgot', Forgot);
-  // router.post('/api/reset', Reset);
+  // * Reset Password
+  router.post('/api/forgot', Forgot);
+  router.post('/api/reset', Reset);
 };

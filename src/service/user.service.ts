@@ -1,28 +1,34 @@
-// import { AbstractService } from "./abstract.service";
-// import myPrisma from "../config/db.config";
+import { PrismaClient, User, Prisma } from '@prisma/client';
+import { AbstractService } from './abstract.service';
 
-// export class UserService extends AbstractService<any> {
-//   constructor() {
-//     super(myPrisma, myPrisma.user);
-//   }
-//   async find(options: any, relations = []) {
-//     return this.repository.find({
-//       where: options,
-//       relations,
-//       order: { created_at: "DESC" },
-//     });
-//   }
-//   async chart(): Promise<any[]> {
-//     const query = `
-//         SELECT
-//         TO_CHAR(u.created_at, 'YYYY-MM-DD') as date,
-//         COUNT(u.id) as count
-//         FROM users u
-//         GROUP BY TO_CHAR(u.created_at, 'YYYY-MM-DD')
-//         ORDER BY TO_CHAR(u.created_at, 'YYYY-MM-DD') ASC;      
-//     `;
+export class UserService extends AbstractService<
+    User,
+    Prisma.UserWhereInput,
+    Prisma.UserCreateInput,
+    Prisma.UserUpdateInput,
+    Prisma.UserInclude
+> {
+    constructor(prisma: PrismaClient) {
+        super(prisma, prisma.user);
+    }
 
-//     const result = await this.repository.query(query);
-//     return result;
-//   }
-// }
+    async find(where: Prisma.UserWhereInput, include: Prisma.UserInclude = {}): Promise<User[]> {
+        return this.model.findMany({
+            where,
+            include,
+            orderBy: { created_at: 'desc' },
+        });
+    }
+
+    async chart(): Promise<any[]> {
+        const result: any = await this.prisma.$queryRaw`
+            SELECT
+            TO_CHAR("created_at", 'YYYY-MM-DD') as date,
+            COUNT("id") as count
+            FROM "User"
+            GROUP BY TO_CHAR("created_at", 'YYYY-MM-DD')
+            ORDER BY TO_CHAR("created_at", 'YYYY-MM-DD') ASC;
+        `;
+        return result;
+    }
+}

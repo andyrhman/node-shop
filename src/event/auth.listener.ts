@@ -8,7 +8,7 @@ import * as handlebars from "handlebars";
 eventEmitter.on("user.created", async (user) => {
     const token = crypto.randomBytes(16).toString("hex");
 
-    const tokenExpiresAt = Date.now() + 1 * 60 * 1000;
+    const tokenExpiresAt = Date.now() + 30 * 60 * 1000;
 
     // Save the reset token and expiration time
     await myPrisma.token.create({

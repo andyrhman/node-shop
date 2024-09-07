@@ -1,27 +1,27 @@
 import { PrismaClient } from '@prisma/client';
 
-export abstract class AbstractService<T> {
+export abstract class AbstractService<T, WhereInput, CreateInput, UpdateInput, Include> {
     protected prisma: PrismaClient;
-    protected model: any;
+    protected model: any; // Prisma model
 
-    constructor(prisma: PrismaClient, model: any) {
+    protected constructor(prisma: PrismaClient, model: any) {
         this.prisma = prisma;
         this.model = model;
     }
 
-    async all(relations: string[] = []): Promise<T[]> {
-        return this.model.findMany({
-            include: this.getRelations(relations),
-        });
+    async all(include: Include = {} as Include): Promise<T[]> {
+        return this.model.findMany({ include });
     }
 
-    async create(data: any): Promise<T> {
-        return this.model.create({
-            data,
-        });
+    async find(where: WhereInput, include: Include = {} as Include): Promise<T[]> {
+        return this.model.findMany({ where, include });
     }
 
-    async update(id: string, data: any): Promise<T> {
+    async create(data: CreateInput): Promise<T> {
+        return this.model.create({ data });
+    }
+
+    async update(id: string, data: UpdateInput): Promise<T> {
         return this.model.update({
             where: { id },
             data,
@@ -29,66 +29,34 @@ export abstract class AbstractService<T> {
     }
 
     async delete(id: string): Promise<T> {
-        return this.model.delete({
-            where: { id },
-        });
+        return this.model.delete({ where: { id } });
     }
 
-    // ! NOT WORKING
-    async findOne(options: any, relations: string[] = []): Promise<T | null> {
-        return this.model.findUnique({
-            where: options,
-            include: this.getRelations(relations),
-        });
+    async findOne(where: WhereInput, include: Include = {} as Include): Promise<T | null> {
+        return this.model.findFirst({ where, include });
+    }
+
+    async total(where: WhereInput): Promise<{ total: number }> {
+        const count = await this.model.count({ where });
+        return { total: count };
     }
 
     async findByEmail(email: string): Promise<T | null> {
-        return this.model.findUnique({
-            where: { email },
-        });
+        return this.model.findUnique({ where: { email } as any });
     }
 
     async findByUsername(username: string): Promise<T | null> {
-        return this.model.findUnique({
-            where: { username },
-        });
+        return this.model.findUnique({ where: { username } as any });
     }
 
     async findByUsernameOrEmail(username: string, email: string): Promise<T | null> {
         return this.model.findFirst({
             where: {
-                OR: [{ username }, { email }],
+                OR: [
+                    { username },
+                    { email },
+                ],
             },
         });
-    }
-
-    async paginate(page: number, take: number, relations: string[] = []): Promise<{ data: T[]; meta: { total: number; page: number; last_page: number; }; }> {
-        const total = await this.model.count();
-        const data = await this.model.findMany({
-            take,
-            skip: (page - 1) * take,
-            include: this.getRelations(relations),
-        });
-
-        return {
-            data,
-            meta: {
-                total,
-                page,
-                last_page: Math.ceil(total / take),
-            },
-        };
-    }
-
-    public getRelations(relations: string[]): any {
-        return relations.reduce((acc, relation) => {
-            const [relationName, subRelation] = relation.split('.');
-            if (subRelation) {
-                acc[relationName] = { include: { [subRelation]: true } };
-            } else {
-                acc[relationName] = true;
-            }
-            return acc;
-        }, {});
     }
 }

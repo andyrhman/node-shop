@@ -1,16 +1,22 @@
-// import myDataSource from "../config/typeorm.config";
-// import { Product } from "../entity/product.entity";
-// import { AbstractService } from "./abstract.service";
+import { PrismaClient, Product, Prisma } from '@prisma/client';
+import { AbstractService } from './abstract.service';
 
-// export class ProductService extends AbstractService<Product> {
-//   constructor() {
-//     super(myDataSource.getRepository(Product));
-//   }
-//   async find(options, relations = []) {
-//     return this.repository.find({
-//       where: options,
-//       relations,
-//       order: { created_at: "DESC" },
-//     });
-//   }
-// }
+export class ProductService extends AbstractService<
+    Product,
+    Prisma.ProductWhereInput,
+    Prisma.ProductCreateInput,
+    Prisma.ProductUpdateInput,
+    Prisma.ProductInclude
+> {
+    constructor(prisma: PrismaClient) {
+        super(prisma, prisma.product);
+    }
+
+    async findMyProduct(where: Prisma.ProductWhereInput, include: Prisma.ProductInclude = {}): Promise<Product[]> {
+        return this.model.findMany({
+            where,
+            include,
+            orderBy: { created_at: 'desc' },
+        });
+    }
+}

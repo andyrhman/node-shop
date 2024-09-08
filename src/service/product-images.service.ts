@@ -1,12 +1,14 @@
-// import myDataSource from "../config/typeorm.config";
-// import { ProductImages } from "../entity/product-images.entity";
-// import { AbstractService } from "./abstract.service";
+import { PrismaClient, ProductImages, Prisma } from '@prisma/client';
+import { AbstractService } from './abstract.service';
 
-// export class ProductImageService extends AbstractService<ProductImages> {
-//   constructor() {
-//     super(myDataSource.getRepository(ProductImages));
-//   }
-//   async deleteMultipleImages(productId: string): Promise<any> {
-//     return this.repository.delete({ productId });
-//   }
-// }
+export class ProductImageService extends AbstractService<
+    ProductImages,
+    Prisma.ProductImagesWhereInput,
+    Prisma.ProductImagesCreateInput,
+    Prisma.ProductImagesUpdateInput,
+    Prisma.ProductImagesInclude
+> {
+    constructor(prisma: PrismaClient) {
+        super(prisma, prisma.productImages);
+    }
+}

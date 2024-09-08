@@ -58,6 +58,7 @@ model Product {
   slug String
   description String
   image String
+  public_id String?
   price String
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
@@ -75,6 +76,7 @@ model Product {
 model ProductImages {
   id String @id @default(uuid())
   image String
+  public_id String?
   product_id String
   product Product @relation(fields: [product_id], references: [id])
 
@@ -182,4 +184,5 @@ model Reset {
 model TestMyModel {
   id String @id @default(uuid())
   name String
+  nama String
 }

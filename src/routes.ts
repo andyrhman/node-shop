@@ -4,6 +4,9 @@ import { AuthenticatedUser, FacebookAuth, googleAuth, Login, Logout, Register, R
 import { AuthMiddleware } from "./middleware/auth.middleware";
 import { Address, CreateAddress, DeleteAddress, GetAddress, UpdateAddress } from "./controller/address.controller";
 import { Forgot, Reset } from "./controller/reset.controller";
+import { CreateProduct, DeleteProduct, DeleteProductImage, DeleteProductVariation, GetProduct, GetProductAdmin, GetProductAvgRating, Products, UpdateProduct, UpdateProductImages, UpdateProductVariants, Variants } from "./controller/product.controller";
+import { AdminAllCategories, Categories, CreateCategory, DeleteCategory, GetCategory, UpdateCategory } from "./controller/category.controller";
+import { Upload } from "./controller/upload.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -30,47 +33,46 @@ export const routes = (router: Router) => {
   router.put("/api/address", AuthMiddleware, UpdateAddress);
   router.delete("/api/address", AuthMiddleware, DeleteAddress);
 
-  // // * Category
-  // router.get("/api/categories", Categories);
-  // router.get("/api/admin/categories", AuthMiddleware, AdminAllCategories);
-  // router.post("/api/admin/category", AuthMiddleware, CreateCategory);
-  // router.get("/api/admin/category/:id", AuthMiddleware, GetCategory);
-  // router.put("/api/admin/category/:id", AuthMiddleware, UpdateCategory);
-  // router.delete("/api/admin/category/:id", AuthMiddleware, DeleteCategory);
+  // * Category
+  router.get("/api/categories", Categories);
+  router.get("/api/admin/categories", AuthMiddleware, AdminAllCategories);
+  router.post("/api/admin/category", AuthMiddleware, CreateCategory);
+  router.get("/api/admin/category/:id", AuthMiddleware, GetCategory);
+  router.put("/api/admin/category/:id", AuthMiddleware, UpdateCategory);
+  router.delete("/api/admin/category/:id", AuthMiddleware, DeleteCategory);
 
-  // // * Product
-  // router.get("/api/products", Products);
-  // router.get("/api/product/rating/:id", GetProductAvgRating);
-  // router.post("/api/admin/products", AuthMiddleware, CreateProduct);
-  // router.get("/api/variants", Variants);
-  // router.get("/api/product/:slug", GetProduct);
-  // router.get("/api/admin/product/:id", AuthMiddleware, GetProductAdmin);
-  // router.put("/api/admin/product/:id", AuthMiddleware, UpdateProduct);
-  // router.put(
-  //   "/api/admin/product-variants/:id",
-  //   AuthMiddleware,
-  //   UpdateProductVariants
-  // );
-  // router.put(
-  //   "/api/admin/product-images/:id",
-  //   AuthMiddleware,
-  //   UpdateProductImages
-  // );
-  // router.delete("/api/admin/product/:id", AuthMiddleware, DeleteProduct);
-  // router.delete(
-  //   "/api/admin/product-images/:id",
-  //   AuthMiddleware,
-  //   DeleteProductImage
-  // );
-  // router.delete(
-  //   "/api/admin/product-variants/:id",
-  //   AuthMiddleware,
-  //   DeleteProductVariation
-  // );
+  // * Product
+  router.get("/api/products", Products);
+  router.get("/api/product/rating/:id", GetProductAvgRating);
+  router.post("/api/admin/products", AuthMiddleware, CreateProduct);
+  router.get("/api/variants", Variants);
+  router.get("/api/product/:slug", GetProduct);
+  router.get("/api/admin/product/:id", AuthMiddleware, GetProductAdmin);
+  router.put("/api/admin/product/:id", AuthMiddleware, UpdateProduct);
+  router.put(
+    "/api/admin/product-variants/:id",
+    AuthMiddleware,
+    UpdateProductVariants
+  );
+  router.put(
+    "/api/admin/product-images/:id",
+    AuthMiddleware,
+    UpdateProductImages
+  );
+  router.delete("/api/admin/product/:id", AuthMiddleware, DeleteProduct);
+  router.delete(
+    "/api/admin/product-images/:id",
+    AuthMiddleware,
+    DeleteProductImage
+  );
+  router.delete(
+    "/api/admin/product-variants/:id",
+    AuthMiddleware,
+    DeleteProductVariation
+  );
 
-  // // * Upload
-  // router.post("/api/admin/upload", AuthMiddleware, Upload);
-  // router.use("/api/uploads", express.static("./uploads"));
+  // * Upload
+  router.post("/api/admin/upload", AuthMiddleware, Upload);
 
   // // * Cart
   // router.get("/api/admin/carts", AuthMiddleware, Carts);

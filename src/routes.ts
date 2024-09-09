@@ -9,6 +9,7 @@ import { AdminAllCategories, Categories, CreateCategory, DeleteCategory, GetCate
 import { Upload } from "./controller/upload.controller";
 import { TotalUsers, Users } from "./controller/user.controller";
 import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCart, UpdateCartQuantity } from "./controller/cart.controller";
+import { Orders } from "./controller/order.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -89,8 +90,8 @@ export const routes = (router: Router) => {
   router.delete("/api/cart/:cart_id", AuthMiddleware, DeleteCart);
   router.get("/api/cart-total", AuthMiddleware, GetTotalCart);
 
-  // // * Order
-  // router.get("/api/admin/orders", AuthMiddleware, Orders);
+  // * Order
+  router.get("/api/admin/orders", AuthMiddleware, Orders);
   // router.post("/api/checkout/orders", userIdMidlleware, CreateOrder);
   // router.post("/api/checkout/orders/confirm", userIdMidlleware, ConfirmOrder);
   // router.get("/api/order-user", userIdMidlleware, GetUserOrder);

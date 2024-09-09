@@ -1,66 +1,52 @@
-// import { Request, Response } from "express";
-// import { OrderService } from "../service/order.service";
-// import sanitizeHtml from "sanitize-html";
-// import { UserService } from "../service/user.service";
-// import { AddressService } from "../service/address.service";
-// import { Order } from "../entity/order.entity";
-// import { isUUID, validate } from "class-validator";
-// import { plainToClass } from "class-transformer";
-// import { CreateOrderDto } from "../validation/dto/orders/create.dto";
-// import { formatValidationErrors } from "../validation/utility/validation.utility";
-// import { Cart } from "../entity/cart.entity";
-// import { CartService } from "../service/cart.service";
-// import { OrderItem, OrderItemStatus } from "../entity/order-items.entity";
-// import { eventEmitter } from "../index";
-// import logger from "../config/logger.config";
-// import myDataSource from "../config/typeorm.config";
-// import Stripe from "stripe";
-// import { ChangeStatusDTO } from "../validation/dto/orders/change-status.dto";
-// import { OrderItemService } from "../service/order-item.service";
+import { Request, Response } from "express";
+import { OrderService } from "../service/order.service";
+import { UserService } from "../service/user.service";
+import { AddressService } from "../service/address.service";
+import { isUUID, validate } from "class-validator";
+import { plainToClass } from "class-transformer";
+import { CreateOrderDto } from "../validation/dto/orders/create.dto";
+import { formatValidationErrors } from "../validation/utility/validation.utility";
+import { CartService } from "../service/cart.service";
+import { eventEmitter } from "../../utility/eventEmitter";
+import { ChangeStatusDTO } from "../validation/dto/orders/change-status.dto";
+import { OrderItemService } from "../service/order-item.service";
+import sanitizeHtml from "sanitize-html";
+import Stripe from "stripe";
+import myPrisma from "../config/db.config";
 
-// export const Orders = async (req: Request, res: Response) => {
-//   try {
-//     const orderService = new OrderService();
-//     let search = req.query.search;
+export const Orders = async (req: Request, res: Response) => {
+    const orderService = new OrderService(myPrisma);
+    let search = req.query.search;
 
-//     let orders = await orderService.find({}, [
-//       "order_items",
-//       "order_items.product",
-//     ]);
-//     if (typeof search === "string") {
-//       search = sanitizeHtml(search);
-//       if (search) {
-//         const searchOrder = search.toString().toLowerCase();
+    let orders = await orderService.find({}, { order_items: { include: { product: true } } });
+    if (typeof search === "string") {
+        search = sanitizeHtml(search);
+        if (search) {
+            const searchOrder = search.toString().toLowerCase();
 
-//         orders = orders.filter((order) => {
-//           const orderMatches = order.order_items.some((orderItem) => {
-//             return orderItem.product_title.toLowerCase().includes(searchOrder);
-//           });
-//           return (
-//             order.name.toLowerCase().includes(searchOrder) ||
-//             order.email.toLowerCase().includes(searchOrder) ||
-//             orderMatches
-//           );
-//         });
+            orders = orders.filter((order: any) => {
+                const orderMatches = order.order_items.some((orderItem) => {
+                    return orderItem.product_title.toLowerCase().includes(searchOrder);
+                });
+                return (
+                    order.name.toLowerCase().includes(searchOrder) ||
+                    order.email.toLowerCase().includes(searchOrder) ||
+                    orderMatches
+                );
+            });
 
-//         // Check if the resulting filtered data array is empty
-//         if (orders.length === 0) {
-//           // Respond with a 404 status code and a message
-//           return res
-//             .status(404)
-//             .json({ message: `No ${search} matching your search criteria.` });
-//         }
-//       }
-//     }
+            // Check if the resulting filtered data array is empty
+            if (orders.length === 0) {
+                // Respond with a 404 status code and a message
+                return res
+                    .status(404)
+                    .json({ message: `No ${search} matching your search criteria.` });
+            }
+        }
+    }
 
-//     res.send(orders);
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+    res.send(orders);
+};
 
 // export const CreateOrder = async (req: Request, res: Response) => {
 //   const body = req.body;

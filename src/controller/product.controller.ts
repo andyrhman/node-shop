@@ -5,8 +5,6 @@ import { plainToClass } from "class-transformer";
 import { isUUID, validate } from "class-validator";
 import { formatValidationErrors } from "../validation/utility/validation.utility";
 import { ProductUpdateDto } from "../validation/dto/products/product-update.dto";
-import { ProductImageService } from "../service/product-images.service";
-import { ProductVariantService } from "../service/product-variant.service";
 import { ReviewService } from "../service/review.service";
 import slugify from "slugify";
 import myPrisma from "../config/db.config";

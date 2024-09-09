@@ -96,7 +96,7 @@ model ProductVariation {
 model Cart {
   id String @id @default(uuid())
   product_title String
-  quantuty Int
+  quantity Int
   price Float
   completed Boolean @default(false)
   created_at DateTime @default(now())
@@ -106,8 +106,8 @@ model Cart {
   product Product @relation(fields: [product_id], references: [id])
   user_id String
   user User @relation(fields: [user_id], references: [id])
-  order_id String
-  order Order @relation(fields: [order_id], references: [id])
+  order_id String?
+  order Order? @relation(fields: [order_id], references: [id])
   @@map("carts")
 }
 

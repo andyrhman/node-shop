@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
+// ! Only works in Controller but most of this methods don't work in service
 export abstract class AbstractService<T, WhereInput, CreateInput, UpdateInput, Include> {
     protected prisma: PrismaClient;
     protected model: any; // Prisma model

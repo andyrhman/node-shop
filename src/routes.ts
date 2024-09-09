@@ -7,6 +7,8 @@ import { Forgot, Reset } from "./controller/reset.controller";
 import { CreateProduct, DeleteProduct, DeleteProductImage, DeleteProductVariation, GetProduct, GetProductAdmin, GetProductAvgRating, Products, UpdateProduct, UpdateProductImages, UpdateProductVariants, Variants } from "./controller/product.controller";
 import { AdminAllCategories, Categories, CreateCategory, DeleteCategory, GetCategory, UpdateCategory } from "./controller/category.controller";
 import { Upload } from "./controller/upload.controller";
+import { TotalUsers, Users } from "./controller/user.controller";
+import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCart, UpdateCartQuantity } from "./controller/cart.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -25,6 +27,10 @@ export const routes = (router: Router) => {
   router.put("/api/user/password", AuthMiddleware, UpdatePassword);
   router.post("/api/verify", ResendVerify);
   router.put("/api/verify/:token", VerifyAccount);
+
+  // * User
+  router.get("/api/admin/users", AuthMiddleware, Users);
+  router.get("/api/admin/total-users", AuthMiddleware, TotalUsers);
 
   // * Address
   router.get("/api/admin/address", AuthMiddleware, Address);
@@ -74,14 +80,14 @@ export const routes = (router: Router) => {
   // * Upload
   router.post("/api/admin/upload", AuthMiddleware, Upload);
 
-  // // * Cart
-  // router.get("/api/admin/carts", AuthMiddleware, Carts);
-  // router.get("/api/admin/carts/:id", AuthMiddleware, GetUserCart);
-  // router.post("/api/cart", userIdMidlleware, CreateCart);
-  // router.get("/api/cart", userIdMidlleware, GetAuthUserCart);
-  // router.put("/api/cart/:id", userIdMidlleware, UpdateCartQuantity);
-  // router.delete("/api/cart/:cart_id", userIdMidlleware, DeleteCart);
-  // router.get("/api/cart-total", userIdMidlleware, GetTotalCart);
+  // * Cart
+  router.get("/api/admin/carts", AuthMiddleware, Carts);
+  router.get("/api/admin/carts/:id", AuthMiddleware, GetUserCart);
+  router.post("/api/cart", AuthMiddleware, CreateCart);
+  router.get("/api/cart", AuthMiddleware, GetAuthUserCart);
+  router.put("/api/cart/:id", AuthMiddleware, UpdateCartQuantity);
+  router.delete("/api/cart/:cart_id", AuthMiddleware, DeleteCart);
+  router.get("/api/cart-total", AuthMiddleware, GetTotalCart);
 
   // // * Order
   // router.get("/api/admin/orders", AuthMiddleware, Orders);

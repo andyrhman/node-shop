@@ -1,66 +1,69 @@
-// import myDataSource from "../config/typeorm.config";
-// import { Cart } from "../entity/cart.entity";
-// import { AbstractService } from "./abstract.service";
+import { PrismaClient, Cart, Prisma } from '@prisma/client';
+import { AbstractService } from './abstract.service';
+export class CartService extends AbstractService<
+    Cart,
+    Prisma.CartWhereInput,
+    Prisma.CartCreateInput,
+    Prisma.CartUpdateInput,
+    Prisma.CartInclude
+> {
+    constructor(prisma: PrismaClient) {
+        super(prisma, prisma.cart);
+    }
+    async deleteUserCart(user_id: string, cart_id: string): Promise<any> {
+        return this.model.delete({ where: { user_id: user_id, id: cart_id } });
+    }
 
-// export class CartService extends AbstractService<Cart> {
-//   constructor() {
-//     super(myDataSource.getRepository(Cart));
-//   }
-//   async deleteUserCart(user_id: string, cart_id: string): Promise<any> {
-//     return this.repository.delete({ user_id: user_id, id: cart_id });
-//   }
+    async findCartItemByProductAndVariant(
+        productId: string,
+        variantId: string,
+        userId: string
+    ) {
+        return this.prisma.cart.findFirst({
+            where: {
+                product_id: productId,
+                variant_id: variantId,
+                user_id: userId,
+                completed: false
+            }
+        });
+    }
 
-//   async findCartItemByProductAndVariant(
-//     productId: string,
-//     variantId: string,
-//     userId: string
-//   ) {
-//     return this.repository
-//       .createQueryBuilder("cart")
-//       .where("cart.product_id = :productId", { productId })
-//       .andWhere("cart.variant_id = :variantId", { variantId })
-//       .andWhere("cart.user_id = :userId", { userId })
-//       .andWhere("cart.completed = :completed", { completed: false })
-//       .getOne();
-//   }
+    async findUserCart(where: Prisma.CartWhereInput, include: Prisma.CartInclude = {}): Promise<Cart[]> {
+        const cartItems = await this.prisma.cart.findMany({ where, include });
+        // map through the cart items and calculate the total price for each item
+        const cartWithTotalPrices = cartItems.map((item) => ({
+            ...item,
+            total_price: item.price * item.quantity,
+        }));
+        return cartWithTotalPrices;
+    }
+    
+    async chart(): Promise<any[]> {
+        const result: any = await this.prisma.$queryRaw`
+            SELECT
+            TO_CHAR("created_at", 'YYYY-MM-DD') as date,
+            REPLACE(TO_CHAR(TRUNC(sum(quantity)), 'FM999G999G999'), ',', '') as sum
+            FROM "Cart"
+            GROUP BY TO_CHAR("created_at", 'YYYY-MM-DD')
+            ORDER BY TO_CHAR("created_at", 'YYYY-MM-DD') ASC;
+        `;
+        return result;
+    }
 
-//   async findUserCart(options, relations = []) {
-//     const cartItems = await this.repository.find({ where: options, relations });
-//     // map through the cart items and calculate the total price for each item
-//     const cartWithTotalPrices = cartItems.map((item) => ({
-//       ...item,
-//       total_price: item.price * item.quantity,
-//     }));
-//     return cartWithTotalPrices;
-//   }
-
-//   async chart(): Promise<any[]> {
-//     const query = `
-//         SELECT
-//         TO_CHAR(c.created_at, 'YYYY-MM-DD') as date,
-//         REPLACE(TO_CHAR(TRUNC(sum(c.quantity)), 'FM999G999G999'), ',', '') as sum
-//         FROM carts c
-//         GROUP BY TO_CHAR(c.created_at, 'YYYY-MM-DD')
-//         ORDER BY TO_CHAR(c.created_at, 'YYYY-MM-DD') ASC;      
-//     `;
-
-//     const result = await this.repository.query(query);
-//     return result;
-//   }
-
-//   async totalPriceAndCount(options, relations = []) {
-//     const cartItems = await this.repository.find({ where: options, relations });
-//     let totalItems = 0;
-//     let totalPrice = 0;
-//     cartItems.forEach((item) => {
-//       if (item.completed === false) {
-//         totalItems += item.quantity;
-//         totalPrice += item.price * item.quantity;
-//       }
-//     });
-//     return {
-//       total: totalItems,
-//       totalPrice,
-//     };
-//   }
-// }
+    async totalPriceAndCount(where: Prisma.CartWhereInput, include: Prisma.CartInclude = {}): Promise<{ totalItems: number; totalPrice: number }> {
+        const cartItems = await this.prisma.cart.findMany({ where, include });
+        let totalItems = 0;
+        let totalPrice = 0;
+        cartItems.forEach((item) => {
+            if (item.completed === false) {
+                totalItems += item.quantity;
+                totalPrice += item.price * item.quantity;
+            }
+        });
+        return {
+            totalItems,
+            totalPrice,
+        };
+    }
+}

@@ -9,6 +9,7 @@
     "dev": "nodemon --exec npx tsx src/index.ts",
     "start": "set NODE_ENV=production && node dist/index.js",
     "seed:users": "npx tsx src/commands/user.seeder.ts",
+    "seed:testusers": "npx tsx src/commands/test-user.seeder.ts",
     "seed:products": "npx tsx src/commands/product.seeder.ts",
     "seed:orders": "npx tsx src/commands/order.seeder.ts",
     "seed:carts": "npx tsx src/commands/cart.seeder.ts",

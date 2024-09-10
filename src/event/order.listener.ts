@@ -1,38 +1,41 @@
-// import transporter from "../config/transporter.config";
-// import * as fs from "fs";
-// import * as handlebars from "handlebars";
-// import { eventEmitter } from "../index";
-// import { Order } from "../entity/order.entity";
+import transporter from "../config/transporter.config";
+import * as fs from "fs";
+import * as handlebars from "handlebars";
+import { eventEmitter } from "../../utility/eventEmitter";
 
-// eventEmitter.on("order.completed", async (order: Order) => {
-//   const orderId = order.id;
-//   const orderTotal = `Rp${new Intl.NumberFormat('id-ID').format(order.total)}`;
-//   const products = order.order_items.map(item => ({
-//       title: item.product_title,
-//       variant: item.variant.name,
-//       price: `Rp${new Intl.NumberFormat('id-ID').format(item.price)}`,
-//       quantity: item.quantity,
-//       image: item.product.image
-//   }));
+eventEmitter.on("order.completed", async (order) => {
+  const orderId = order.id;
 
-//   // ? https://www.phind.com/agent?cache=clpqjretb0003ia07g9pc4v5a
-//   const source = fs.readFileSync("src/templates/order.hbs", "utf-8").toString();
+  const countTotal = order.order_items.reduce((sum, i) => sum + i.quantity * i.price, 0)
 
-//   const template = handlebars.compile(source);
+  const orderTotal = `Rp${new Intl.NumberFormat('id-ID').format(countTotal)}`;
 
-//   const replacements = {
-//     products,
-//     orderId,
-//     orderTotal
-//   };
-//   const htmlToSend = template(replacements);
+  const products = order.order_items.map(item => ({
+      title: item.product_title,
+      variant: item.variant.name,
+      price: `Rp${new Intl.NumberFormat('id-ID').format(item.price)}`,
+      quantity: item.quantity,
+      image: item.product.image
+  }));
 
-//   const options = {
-//     from: "service@mail.com",
-//     to: order.email,
-//     subject: 'An order has been completed',
-//     html: htmlToSend,
-//   };
+  // ? https://www.phind.com/agent?cache=clpqjretb0003ia07g9pc4v5a
+  const source = fs.readFileSync("src/templates/order.hbs", "utf-8").toString();
 
-//   await transporter.sendMail(options);
-// });
+  const template = handlebars.compile(source);
+
+  const replacements = {
+    products,
+    orderId,
+    orderTotal
+  };
+  const htmlToSend = template(replacements);
+
+  const options = {
+    from: "service@mail.com",
+    to: order.email,
+    subject: 'An order has been completed',
+    html: htmlToSend,
+  };
+
+  await transporter.sendMail(options);
+});

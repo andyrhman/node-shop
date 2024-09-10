@@ -11,7 +11,7 @@ import { globalErrorHandler } from "./middleware/error.middleware";
 dotenv.config();
 
 import "./event/auth.listener";
-// import "./event/order.listener";
+import "./event/order.listener";
 
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_NAME,

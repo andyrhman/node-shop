@@ -9,7 +9,7 @@ import { AdminAllCategories, Categories, CreateCategory, DeleteCategory, GetCate
 import { Upload } from "./controller/upload.controller";
 import { TotalUsers, Users } from "./controller/user.controller";
 import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCart, UpdateCartQuantity } from "./controller/cart.controller";
-import { Orders } from "./controller/order.controller";
+import { ConfirmOrder, CreateOrder, Orders } from "./controller/order.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -92,9 +92,9 @@ export const routes = (router: Router) => {
 
   // * Order
   router.get("/api/admin/orders", AuthMiddleware, Orders);
-  // router.post("/api/checkout/orders", userIdMidlleware, CreateOrder);
-  // router.post("/api/checkout/orders/confirm", userIdMidlleware, ConfirmOrder);
-  // router.get("/api/order-user", userIdMidlleware, GetUserOrder);
+  router.post("/api/checkout/orders", AuthMiddleware, CreateOrder);
+  router.post("/api/checkout/orders/confirm", AuthMiddleware, ConfirmOrder);
+  // router.get("/api/order-user", AuthMiddleware, GetUserOrder);
   // router.get("/api/admin/order-items/:id", AuthMiddleware, GetOrderItem);
   // router.put("/api/admin/orders/:id", AuthMiddleware, ChangeOrderStatus);
 

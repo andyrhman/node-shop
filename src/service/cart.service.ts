@@ -30,7 +30,7 @@ export class CartService extends AbstractService<
     }
 
     async findUserCart(where: Prisma.CartWhereInput, include: Prisma.CartInclude = {}): Promise<Cart[]> {
-        const cartItems = await this.prisma.cart.findMany({ where, include });
+        const cartItems = await this.prisma.cart.findMany({ where, include, orderBy: { created_at: 'desc' } });
         // map through the cart items and calculate the total price for each item
         const cartWithTotalPrices = cartItems.map((item) => ({
             ...item,
@@ -38,7 +38,7 @@ export class CartService extends AbstractService<
         }));
         return cartWithTotalPrices;
     }
-    
+
     async chart(): Promise<any[]> {
         const result: any = await this.prisma.$queryRaw`
             SELECT
@@ -51,7 +51,7 @@ export class CartService extends AbstractService<
         return result;
     }
 
-    async totalPriceAndCount(where: Prisma.CartWhereInput, include: Prisma.CartInclude = {}): Promise<{ totalItems: number; totalPrice: number }> {
+    async totalPriceAndCount(where: Prisma.CartWhereInput, include: Prisma.CartInclude = {}): Promise<{ totalItems: number; totalPrice: number; }> {
         const cartItems = await this.prisma.cart.findMany({ where, include });
         let totalItems = 0;
         let totalPrice = 0;

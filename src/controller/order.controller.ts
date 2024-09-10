@@ -10,6 +10,7 @@ import { CartService } from "../service/cart.service";
 import { eventEmitter } from "../../utility/eventEmitter";
 import { ChangeStatusDTO } from "../validation/dto/orders/change-status.dto";
 import { OrderItemService } from "../service/order-item.service";
+import { Cart, OrderItem, OrderItemStatus } from "@prisma/client";
 import sanitizeHtml from "sanitize-html";
 import Stripe from "stripe";
 import myPrisma from "../config/db.config";
@@ -48,171 +49,172 @@ export const Orders = async (req: Request, res: Response) => {
     res.send(orders);
 };
 
-// export const CreateOrder = async (req: Request, res: Response) => {
-//   const body = req.body;
-//   const input = plainToClass(CreateOrderDto, body);
-//   const validationErrors = await validate(input);
+export const CreateOrder = async (req: Request, res: Response) => {
+    const body = req.body;
+    const input = plainToClass(CreateOrderDto, body);
+    const validationErrors = await validate(input);
 
-//   if (validationErrors.length > 0) {
-//     // Use the utility function to format and return the validation errors
-//     return res.status(400).json(formatValidationErrors(validationErrors));
-//   }
-//   const userService = new UserService();
-//   const addressService = new AddressService();
-//   const cartService = new CartService();
-//   const userId = req["id"];
+    if (validationErrors.length > 0) {
+        // Use the utility function to format and return the validation errors
+        return res.status(400).json(formatValidationErrors(validationErrors));
+    }
+    const userService = new UserService(myPrisma);
+    const addressService = new AddressService(myPrisma);
+    const cartService = new CartService(myPrisma);
+    const userId = req["user"];
 
-//   const user = await userService.findOne({ id: userId });
-//   const address = await addressService.findOne({ user_id: userId });
-//   if (!address) {
-//     return res
-//       .status(400)
-//       .send({ message: "Please create your shipping address first." });
-//   }
-//   const queryRunner = myDataSource.createQueryRunner();
-//   try {
-//     await queryRunner.connect();
-//     await queryRunner.startTransaction();
+    const user = await userService.findOne({ id: userId.id });
+    const address = await addressService.findOne({ user_id: userId.id });
+    if (!address) {
+        return res
+            .status(400)
+            .send({ message: "Please create your shipping address first." });
+    }
+    try {
+        await myPrisma.$transaction(async (prisma) => {
+            // Create order
+            const order = await prisma.order.create({
+                data: {
+                    name: user.fullName,
+                    email: user.email,
+                    user_id: userId.id,
+                    transaction_id: undefined
+                },
+            });
 
-//     const o = new Order();
-//     o.name = user.fullName;
-//     o.email = user.email;
-//     o.user_id = userId;
+            const line_items = [];
 
-//     const order = await queryRunner.manager.save(o);
+            for (let c of body.carts) {
+                if (!isUUID(c.cart_id)) {
+                    throw new Error("Invalid UUID format");
+                }
 
-//     // * Stripe.
-//     const line_items = [];
+                const cart: any = await cartService.find(
+                    { id: c.cart_id, user_id: userId.id },
+                    { product: true, variant: true }
+                );
 
-//     for (let c of body.carts) {
-//       if (!isUUID(c.cart_id)) {
-//         return res.status(400).send({ message: "Invalid UUID format" });
-//       }
-//       const cart: Cart[] = await cartService.find(
-//         { id: c.cart_id, user_id: userId },
-//         ["product", "variant"]
-//       );
+                if (cart.length === 0) {
+                    throw new Error("Cart not found.");
+                }
+                if (cart[0].completed === true) {
+                    throw new Error("Invalid order, please add a new order.");
+                }
 
-//       if (cart.length === 0) {
-//         return res.status(404).send({ message: "Cart not found." });
-//       }
-//       if (cart[0].completed === true) {
-//         return res
-//           .status(400)
-//           .send({ message: "Invalid order, please add new order." });
-//       }
-//       const orderItem = new OrderItem();
-//       orderItem.order = order;
-//       orderItem.product_title = cart[0].product_title;
-//       orderItem.price = cart[0].price;
-//       orderItem.quantity = cart[0].quantity;
-//       orderItem.product_id = cart[0].product_id;
-//       orderItem.variant_id = cart[0].variant_id;
+                const totalAmount = cart[0].price * cart[0].quantity;
+                if (totalAmount < 7500) {
+                    throw new Error("The total amount must be at least Rp7,500.00");
+                }
 
-//       const totalAmount = cart[0].price * cart[0].quantity;
-//       if (totalAmount < 7500) {
-//         return res
-//           .status(400)
-//           .send({ message: "The total amount must be at least Rp7,500.00" });
-//       }
+                // Create order item
+                await prisma.orderItem.create({
+                    data: {
+                        order_id: order.id,
+                        product_title: cart[0].product_title,
+                        price: cart[0].price,
+                        quantity: cart[0].quantity,
+                        product_id: cart[0].product_id,
+                        variant_id: cart[0].variant_id,
+                    },
+                });
 
-//       cart[0].order_id = order.id;
-//       await queryRunner.manager.update(Cart, cart[0].id, cart[0]);
+                // Update cart
+                await prisma.cart.update({
+                    where: { id: cart[0].id },
+                    data: { order_id: order.id },
+                });
 
-//       await queryRunner.manager.save(orderItem);
+                // * Stripe
+                line_items.push({
+                    price_data: {
+                        currency: "idr",
+                        unit_amount: cart[0].price,
+                        product_data: {
+                            name: `${cart[0].product_title} - Variant ${cart[0].variant.name}`,
+                            description: cart[0].product.description,
+                            images: [`${cart[0].product.image}`],
+                        },
+                    },
+                    quantity: cart[0].quantity,
+                });
+            }
 
-//       // * Stripe
-//       line_items.push({
-//         price_data: {
-//           currency: "idr",
-//           unit_amount: cart[0].price,
-//           product_data: {
-//             name: `${cart[0].product_title} - Variant ${cart[0].variant.name}`,
-//             description: cart[0].product.description,
-//             images: [`${cart[0].product.image}`],
-//           },
-//         },
-//         quantity: cart[0].quantity,
-//       });
-//     }
-//     // * Stripe
-//     const stripe = new Stripe(process.env.STRIPE_SECRET, {
-//       apiVersion: "2023-10-16",
-//     });
+            // * Stripe
+            const stripe = new Stripe(process.env.STRIPE_SECRET, {
+                apiVersion: "2023-10-16",
+            });
 
-//     const source = await stripe.checkout.sessions.create({
-//       payment_method_types: ["card"],
-//       mode: "payment",
-//       line_items,
-//       success_url: `${process.env.CHECKOUT_URL}/success?source={CHECKOUT_SESSION_ID}`,
-//       cancel_url: `${process.env.CHECKOUT_URL}/error`,
-//     });
+            const source = await stripe.checkout.sessions.create({
+                payment_method_types: ["card"],
+                mode: "payment",
+                line_items,
+                success_url: `${process.env.CHECKOUT_URL}/success?source={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${process.env.CHECKOUT_URL}/error`,
+            });
 
-//     order.transaction_id = source["id"];
-//     await queryRunner.manager.save(order);
+            // Update order with transaction ID
+            await prisma.order.update({
+                where: { id: order.id },
+                data: { transaction_id: source.id },
+            });
 
-//     await queryRunner.commitTransaction();
-//     res.send(source);
-//   } catch (error) {
-//     await queryRunner.rollbackTransaction();
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+            res.send(source);
+        });
+    } catch (error) {
+        return res.status(400).send({ message: "Invalid Request" });
+    }
+};
 
-// export const ConfirmOrder = async (req: Request, res: Response) => {
-//   try {
-//     const user = req["id"];
-//     const orderService = new OrderService();
-//     const orderItemService = new OrderItemService();
-//     const cartService = new CartService();
+export const ConfirmOrder = async (req: Request, res: Response) => {
+    try {
+        const user = req["user"];
+        const orderService = new OrderService(myPrisma);
+        const orderItemService = new OrderItemService(myPrisma);
+        const cartService = new CartService(myPrisma);
 
-//     const order = await orderService.findOne(
-//       {
-//         transaction_id: req.body.source,
-//       },
-//       ["user", "order_items", "order_items.product", "order_items.variant"]
-//     );
+        const order = await orderService.findOne(
+            {
+                transaction_id: req.body.source,
+            },
+            { user: true, order_items: { include: { product: true, variant: true } } }
+        );
 
-//     if (!order) {
-//       return res.status(404).send("Order not found");
-//     }
+        if (!order) {
+            return res.status(404).send({ messagge: "Order not found" });
+        } else if (order.completed) {
+            return res.status(404).send({ message: "This order payment has been completed" });
+        }
 
-//     const carts: Cart[] = await cartService.find({
-//       order_id: order.id,
-//       user_id: user,
-//     });
-//     const orderItems: OrderItem[] = await orderItemService.find({
-//       order_id: order.id,
-//     });
-//     if (carts.length === 0) {
-//       return res.status(403).send("Forbidden");
-//     }
+        const carts: Cart[] = await cartService.find({
+            order_id: order.id,
+            user_id: user.id,
+        });
+        const orderItems: OrderItem[] = await orderItemService.find({
+            order_id: order.id,
+        });
+        if (carts.length === 0) {
+            return res.status(403).send({ message: "Forbidden" });
+        }
 
-//     for (let cart of carts) {
-//       await cartService.update(cart.id, { completed: true });
-//     }
-//     for (let orderItem of orderItems) {
-//       await orderItemService.update(orderItem.id, {
-//         status: OrderItemStatus.Selesai,
-//       });
-//     }
-//     await orderService.update(order.id, { completed: true });
+        for (let cart of carts) {
+            await cartService.update(cart.id, { completed: true });
+        }
+        for (let orderItem of orderItems) {
+            await orderItemService.update(orderItem.id, {
+                status: OrderItemStatus.Selesai,
+            });
+        }
+        await orderService.update(order.id, { completed: true });
 
-//     eventEmitter.emit("order.completed", order);
+        eventEmitter.emit("order.completed", order);
 
-//     res.send({
-//       message: "success",
-//     });
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+        res.send({
+            message: "success",
+        });
+    } catch (error) {
+        return res.status(400).send({ message: "Invalid Request" });
+    }
+};
 
 // export const GetUserOrder = async (req: Request, res: Response) => {
 //   try {

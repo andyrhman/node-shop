@@ -33,9 +33,9 @@ export const CreateAddress = async (req: Request, res: Response) => {
         return res.status(400).json(formatValidationErrors(validationErrors));
     }
 
-    const user = req["user"];
+    const user = req["id"];
     const addressService = new AddressService(myPrisma);
-    const existingAddress = await addressService.findOne({ user_id: user.id });
+    const existingAddress = await addressService.findOne({ user_id: user });
 
     if (existingAddress) {
         return res.status(400).send({ message: "Address already exists" });
@@ -43,7 +43,7 @@ export const CreateAddress = async (req: Request, res: Response) => {
 
     await addressService.create({
         ...body,
-        user_id: user.id,
+        user_id: user,
     });
 
     res.send({
@@ -52,11 +52,11 @@ export const CreateAddress = async (req: Request, res: Response) => {
 };
 
 export const GetAddress = async (req: Request, res: Response) => {
-    const user = req["user"];
+    const user = req["id"];
 
     const addressService = new AddressService(myPrisma);
 
-    const checkAddress = await addressService.findOne({ user_id: user.id });
+    const checkAddress = await addressService.findOne({ user_id: user });
 
     if (!checkAddress) {
         return res.status(404).send({ message: "Address not found" });
@@ -76,9 +76,9 @@ export const UpdateAddress = async (req: Request, res: Response) => {
     }
 
     const addressService = new AddressService(myPrisma);
-    const user = req["user"];
+    const user = req["id"];
 
-    const checkAddress = await addressService.findOne({ user_id: user.id });
+    const checkAddress = await addressService.findOne({ user_id: user });
 
     if (!checkAddress) {
         return res.status(404).send({ message: "Address not found" });
@@ -93,9 +93,9 @@ export const UpdateAddress = async (req: Request, res: Response) => {
 
 export const DeleteAddress = async (req: Request, res: Response) => {
     const addressService = new AddressService(myPrisma);
-    const user = req["user"];
+    const user = req["id"];
 
-    const checkAddress = await addressService.findOne({ user_id: user.id });
+    const checkAddress = await addressService.findOne({ user_id: user });
 
     if (!checkAddress) {
         return res.status(404).send({ message: "Address not found" });

@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty } from "class-validator";
-import { OrderItemStatus } from "../../../entity/order-items.entity";
+import { OrderItemStatus } from "@prisma/client";
 
 export class ChangeStatusDTO{
     @IsNotEmpty()

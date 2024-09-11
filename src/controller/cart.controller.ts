@@ -91,12 +91,12 @@ export const CreateCart = async (req: Request, res: Response) => {
         return res.status(400).json(formatValidationErrors(validationErrors));
     }
 
-    const user = req["user"];
+    const user = req["id"];
     const cartService = new CartService(myPrisma);
     const existingCartItem = await cartService.findCartItemByProductAndVariant(
         body.product_id,
         body.variant_id,
-        user.id
+        user
     );
 
     if (existingCartItem) {
@@ -109,7 +109,7 @@ export const CreateCart = async (req: Request, res: Response) => {
             product_title: body.product_title,
             quantity: body.quantity,
             price: body.price,
-            user: { connect: { id: user.id } },
+            user: { connect: { id: user } },
             product: { connect: { id: body.product_id } },
             variant: { connect: { id: body.variant_id } },
             order: undefined
@@ -124,8 +124,8 @@ export const CreateCart = async (req: Request, res: Response) => {
 
 export const GetAuthUserCart = async (req: Request, res: Response) => {
     const cartService = new CartService(myPrisma);
-    const user = req["user"];
-    const cart = await cartService.findUserCart({ user_id: user.id }, { variant: true, product: true });
+    const user = req["id"];
+    const cart = await cartService.findUserCart({ user_id: user }, { variant: true, product: true });
     if (!cart) {
         return res.status(400).send({ message: "Invalid Request" });
     }
@@ -158,23 +158,23 @@ export const UpdateCartQuantity = async (req: Request, res: Response) => {
 
 export const DeleteCart = async (req: Request, res: Response) => {
     const cartService = new CartService(myPrisma);
-    const user_id = req["user"];
+    const user_id = req["id"];
     const cart = await cartService.findOne({ id: req.params.cart_id });
     if (!cart) {
         return res.status(404).send({ message: "Cart Not Found" });
     }
-    if (cart.user_id !== user_id.id) {
+    if (cart.user_id !== user_id) {
         return res.status(403).send({ message: "Not Allowed" });
     }
-    await cartService.deleteUserCart(user_id.id, req.params.cart_id);
+    await cartService.deleteUserCart(user_id, req.params.cart_id);
     res.status(204).send(null);
 };
 
 export const GetTotalCart = async (req: Request, res: Response) => {
-    const user = req["user"];
+    const user = req["id"];
     const cartService = new CartService(myPrisma);
     const totalData = await cartService.totalPriceAndCount({
-        user_id: user.id,
+        user_id: user,
     });
     res.send({
         totalItems: totalData.totalItems,

@@ -9,7 +9,19 @@ export class CreateReviewDTO{
 
     @IsNotEmpty()
     @IsUUID()
+    order_item: string;
+
+    @IsNotEmpty()
+    @IsUUID()
+    order_id: string;
+
+    @IsNotEmpty()
+    @IsUUID()
     product_id: string;
+
+    @IsNotEmpty()
+    @IsUUID()
+    variant_id: string;
 
     image: string;
 }

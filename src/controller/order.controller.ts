@@ -61,10 +61,10 @@ export const CreateOrder = async (req: Request, res: Response) => {
     const userService = new UserService(myPrisma);
     const addressService = new AddressService(myPrisma);
     const cartService = new CartService(myPrisma);
-    const userId = req["user"];
+    const userId = req["id"];
 
-    const user = await userService.findOne({ id: userId.id });
-    const address = await addressService.findOne({ user_id: userId.id });
+    const user = await userService.findOne({ id: userId });
+    const address = await addressService.findOne({ user_id: userId });
     if (!address) {
         return res
             .status(400)
@@ -77,7 +77,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
                 data: {
                     name: user.fullName,
                     email: user.email,
-                    user_id: userId.id,
+                    user_id: userId,
                     transaction_id: undefined
                 },
             });
@@ -90,7 +90,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
                 }
 
                 const cart: any = await cartService.find(
-                    { id: c.cart_id, user_id: userId.id },
+                    { id: c.cart_id, user_id: userId },
                     { product: true, variant: true }
                 );
 
@@ -167,7 +167,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
 
 export const ConfirmOrder = async (req: Request, res: Response) => {
     try {
-        const user = req["user"];
+        const user = req["id"];
         const orderService = new OrderService(myPrisma);
         const orderItemService = new OrderItemService(myPrisma);
         const cartService = new CartService(myPrisma);
@@ -187,7 +187,7 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
 
         const carts: Cart[] = await cartService.find({
             order_id: order.id,
-            user_id: user.id,
+            user_id: user,
         });
         const orderItems: OrderItem[] = await orderItemService.find({
             order_id: order.id,
@@ -216,58 +216,35 @@ export const ConfirmOrder = async (req: Request, res: Response) => {
     }
 };
 
-// export const GetUserOrder = async (req: Request, res: Response) => {
-//   try {
-//     const id = req["id"];
-//     const orderService = new OrderService();
-//     res.send(
-//       await orderService.find({ user_id: id }, [
-//         "order_items",
-//         "order_items.product",
-//       ])
-//     );
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+export const GetUserOrder = async (req: Request, res: Response) => {
+    const id = req["id"];
+    const orderService = new OrderService(myPrisma);
+    res.send(
+        await orderService.find({ user_id: id },
+            { order_items: { include: { product: true } } })
+    );
+};
 
-// export const GetOrderItem = async (req: Request, res: Response) => {
-//   try {
-//     const orderItemService = new OrderItemService();
-//     res.send(await orderItemService.findOne({ id: req.params.id }));
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+export const GetOrderItem = async (req: Request, res: Response) => {
+    const orderItemService = new OrderItemService(myPrisma);
+    res.send(await orderItemService.findOne({ id: req.params.id }));
+};
 
-// export const ChangeOrderStatus = async (req: Request, res: Response) => {
-//   try {
-//     const body = req.body;
-//     const input = plainToClass(ChangeStatusDTO, body);
-//     const validationErrors = await validate(input);
+export const ChangeOrderStatus = async (req: Request, res: Response) => {
+    const body = req.body;
+    const input = plainToClass(ChangeStatusDTO, body);
+    const validationErrors = await validate(input);
+ 
+    if (validationErrors.length > 0) {
+        // Use the utility function to format and return the validation errors
+        return res.status(400).json(formatValidationErrors(validationErrors));
+    }
 
-//     if (validationErrors.length > 0) {
-//       // Use the utility function to format and return the validation errors
-//       return res.status(400).json(formatValidationErrors(validationErrors));
-//     }
+    if (!isUUID(req.params.id)) {
+        return res.status(400).send({ message: "Invalid UUID format" });
+    }
 
-//     if (!isUUID(req.params.id)) {
-//       return res.status(400).send({ message: "Invalid UUID format" });
-//     }
+    const orderItemService = new OrderItemService(myPrisma);
 
-//     const orderItemService = new OrderItemService();
-
-//     res.send(await orderItemService.update(req.params.id, body));
-//   } catch (error) {
-//     if (process.env.NODE_ENV === "development") {
-//       logger.error(error);
-//     }
-//     return res.status(400).send({ message: "Invalid Request" });
-//   }
-// };
+    res.send(await orderItemService.update(req.params.id, body));
+};

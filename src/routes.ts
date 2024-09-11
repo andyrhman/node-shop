@@ -9,7 +9,9 @@ import { AdminAllCategories, Categories, CreateCategory, DeleteCategory, GetCate
 import { Upload } from "./controller/upload.controller";
 import { TotalUsers, Users } from "./controller/user.controller";
 import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCart, UpdateCartQuantity } from "./controller/cart.controller";
-import { ConfirmOrder, CreateOrder, Orders } from "./controller/order.controller";
+import { ChangeOrderStatus, ConfirmOrder, CreateOrder, GetOrderItem, GetUserOrder, Orders } from "./controller/order.controller";
+import { CreateReview, GetReviewAdmin, GetReviewsUser, Reviews } from "./controller/review.controller";
+import { userIdMidlleware } from "./middleware/userid.middleware";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -35,10 +37,10 @@ export const routes = (router: Router) => {
 
   // * Address
   router.get("/api/admin/address", AuthMiddleware, Address);
-  router.post("/api/address", AuthMiddleware, CreateAddress);
-  router.get("/api/address", AuthMiddleware, GetAddress);
-  router.put("/api/address", AuthMiddleware, UpdateAddress);
-  router.delete("/api/address", AuthMiddleware, DeleteAddress);
+  router.post("/api/address", userIdMidlleware, CreateAddress);
+  router.get("/api/address", userIdMidlleware, GetAddress);
+  router.put("/api/address", userIdMidlleware, UpdateAddress);
+  router.delete("/api/address", userIdMidlleware, DeleteAddress);
 
   // * Category
   router.get("/api/categories", Categories);
@@ -80,29 +82,30 @@ export const routes = (router: Router) => {
 
   // * Upload
   router.post("/api/admin/upload", AuthMiddleware, Upload);
+  router.use("/api/uploads", express.static("./uploads"));
 
   // * Cart
   router.get("/api/admin/carts", AuthMiddleware, Carts);
   router.get("/api/admin/carts/:id", AuthMiddleware, GetUserCart);
-  router.post("/api/cart", AuthMiddleware, CreateCart);
-  router.get("/api/cart", AuthMiddleware, GetAuthUserCart);
-  router.put("/api/cart/:id", AuthMiddleware, UpdateCartQuantity);
-  router.delete("/api/cart/:cart_id", AuthMiddleware, DeleteCart);
-  router.get("/api/cart-total", AuthMiddleware, GetTotalCart);
+  router.post("/api/cart", userIdMidlleware, CreateCart);
+  router.get("/api/cart", userIdMidlleware, GetAuthUserCart);
+  router.put("/api/cart/:id", userIdMidlleware, UpdateCartQuantity);
+  router.delete("/api/cart/:cart_id", userIdMidlleware, DeleteCart);
+  router.get("/api/cart-total", userIdMidlleware, GetTotalCart);
 
   // * Order
   router.get("/api/admin/orders", AuthMiddleware, Orders);
-  router.post("/api/checkout/orders", AuthMiddleware, CreateOrder);
-  router.post("/api/checkout/orders/confirm", AuthMiddleware, ConfirmOrder);
-  // router.get("/api/order-user", AuthMiddleware, GetUserOrder);
-  // router.get("/api/admin/order-items/:id", AuthMiddleware, GetOrderItem);
-  // router.put("/api/admin/orders/:id", AuthMiddleware, ChangeOrderStatus);
+  router.post("/api/checkout/orders", userIdMidlleware, CreateOrder);
+  router.post("/api/checkout/orders/confirm", userIdMidlleware, ConfirmOrder);
+  router.get("/api/order-user", userIdMidlleware, GetUserOrder);
+  router.get("/api/admin/order-items/:id", AuthMiddleware, GetOrderItem);
+  router.put("/api/admin/orders/:id", AuthMiddleware, ChangeOrderStatus);
 
-  // // * Review
-  // router.get('/api/admin/reviews', AuthMiddleware, Reviews);
-  // router.get('/api/admin/reviews/:id', AuthMiddleware, GetReviewAdmin);
-  // router.get('/api/reviews/:id', GetReviewsUser);
-  // router.post('/api/review', userIdMidlleware, CreateReview);
+  // * Review
+  router.get('/api/admin/reviews', AuthMiddleware, Reviews);
+  router.get('/api/admin/reviews/:id', AuthMiddleware, GetReviewAdmin);
+  router.get('/api/reviews/:id', GetReviewsUser);
+  router.post('/api/review', userIdMidlleware, CreateReview);
 
   // // * Statistic
   // router.get('/api/admin/stats', AuthMiddleware, Stats);

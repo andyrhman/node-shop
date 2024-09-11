@@ -1,4 +1,3 @@
-// import { userIdMidlleware } from "./middleware/userid.middleware";
 import express, { Router } from "express";
 import { AuthenticatedUser, FacebookAuth, googleAuth, Login, Logout, Register, ResendVerify, UpdateInfo, UpdatePassword, VerifyAccount } from "./controller/auth.controller";
 import { AuthMiddleware } from "./middleware/auth.middleware";
@@ -12,6 +11,7 @@ import { Carts, CreateCart, DeleteCart, GetAuthUserCart, GetTotalCart, GetUserCa
 import { ChangeOrderStatus, ConfirmOrder, CreateOrder, GetOrderItem, GetUserOrder, Orders } from "./controller/order.controller";
 import { CreateReview, GetReviewAdmin, GetReviewsUser, Reviews } from "./controller/review.controller";
 import { userIdMidlleware } from "./middleware/userid.middleware";
+import { CartsStat, OrdersStat, Stats, UsersStat } from "./controller/statistic.controller";
 
 export const routes = (router: Router) => {
   // * Authentication
@@ -107,11 +107,11 @@ export const routes = (router: Router) => {
   router.get('/api/reviews/:id', GetReviewsUser);
   router.post('/api/review', userIdMidlleware, CreateReview);
 
-  // // * Statistic
-  // router.get('/api/admin/stats', AuthMiddleware, Stats);
-  // router.get('/api/admin/order-chart', AuthMiddleware, OrdersStat);
-  // router.get('/api/admin/cart-chart', AuthMiddleware, CartsStat);
-  // router.get('/api/admin/user-chart', AuthMiddleware, UsersStat);
+  // * Statistic
+  router.get('/api/admin/stats', AuthMiddleware, Stats);
+  router.get('/api/admin/order-chart', AuthMiddleware, OrdersStat);
+  router.get('/api/admin/cart-chart', AuthMiddleware, CartsStat);
+  router.get('/api/admin/user-chart', AuthMiddleware, UsersStat);
 
   // * Reset Password
   router.post('/api/forgot', Forgot);

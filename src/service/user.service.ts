@@ -23,11 +23,11 @@ export class UserService extends AbstractService<
     async chart(): Promise<any[]> {
         const result: any = await this.prisma.$queryRaw`
             SELECT
-            TO_CHAR("created_at", 'YYYY-MM-DD') as date,
-            COUNT("id") as count
-            FROM "User"
-            GROUP BY TO_CHAR("created_at", 'YYYY-MM-DD')
-            ORDER BY TO_CHAR("created_at", 'YYYY-MM-DD') ASC;
+            TO_CHAR(u.created_at, 'YYYY-MM-DD') as date,
+            COUNT(u.id) as count
+            FROM users u
+            GROUP BY TO_CHAR(u.created_at, 'YYYY-MM-DD')
+            ORDER BY TO_CHAR(u.created_at, 'YYYY-MM-DD') ASC;
         `;
         return result;
     }

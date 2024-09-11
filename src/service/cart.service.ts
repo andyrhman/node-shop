@@ -42,11 +42,11 @@ export class CartService extends AbstractService<
     async chart(): Promise<any[]> {
         const result: any = await this.prisma.$queryRaw`
             SELECT
-            TO_CHAR("created_at", 'YYYY-MM-DD') as date,
-            REPLACE(TO_CHAR(TRUNC(sum(quantity)), 'FM999G999G999'), ',', '') as sum
-            FROM "Cart"
-            GROUP BY TO_CHAR("created_at", 'YYYY-MM-DD')
-            ORDER BY TO_CHAR("created_at", 'YYYY-MM-DD') ASC;
+            TO_CHAR(c.created_at, 'YYYY-MM-DD') as date,
+            REPLACE(TO_CHAR(TRUNC(sum(c.quantity)), 'FM999G999G999'), ',', '') as sum
+            FROM carts c
+            GROUP BY TO_CHAR(c.created_at, 'YYYY-MM-DD')
+            ORDER BY TO_CHAR(c.created_at, 'YYYY-MM-DD') ASC;      
         `;
         return result;
     }

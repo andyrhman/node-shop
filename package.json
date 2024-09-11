@@ -74,6 +74,7 @@
     "sanitize-html": "^2.11.0",
     "slugify": "^1.6.6",
     "stripe": "^14.17.0",
+    "superjson": "^2.2.1",
     "typeorm": "^0.3.20"
   }
 }
